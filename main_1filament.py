@@ -1,10 +1,10 @@
 import numpy as np
 import healpy as hp
 import matplotlib.pyplot as pl
-from Functions import *
-from Sky import Sky
-from MagField import MagField_1fil
-from FilPop import FilPop_1fil
+from src/Functions import *
+from src/Sky import Sky
+from src/MagField import MagField_1fil
+from src/FilPop import FilPop_1fil
 import multiprocessing as mp
 
 output_tqumap	= 'test_ns256_Nf10k.fits'
