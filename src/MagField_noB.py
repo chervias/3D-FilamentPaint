@@ -4,9 +4,11 @@ from scipy.interpolate import RegularGridInterpolator
 class MagField_noB:
 	def __init__(self,size,filename):
 		# size is a physical size
-		self.size			= size
-		self.Bcube			= self.get_MagField()
-		self.interp_fn		= self.get_interpolator()
+                self.pixels = 256
+                self.size			= size
+                self.filename = filename
+                self.Bcube			= self.get_MagField()
+                self.interp_fn		= self.get_interpolator()
 	
 	def get_MagField(self):
 		Bcube					= np.load(self.filename)
