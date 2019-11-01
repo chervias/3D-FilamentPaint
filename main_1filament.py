@@ -1,24 +1,21 @@
+import sys
+sys.path.insert(0,'src')
 import numpy as np
 import healpy as hp
 import matplotlib.pyplot as pl
-from src/Functions import *
-from src/Sky import Sky
-from src/MagField import MagField_1fil
-from src/FilPop import FilPop_1fil
+from Functions import *
+from Sky import Sky
+from MagField import MagField_1fil
+from FilPop import FilPop_1fil
 import multiprocessing as mp
 
-output_tqumap	= 'test_ns256_Nf10k.fits'
 nside			= 256
 Npix_box		= 256
 Nfil			= 1
 size_box		= 100.0 # physical size box
 
-# Create the sky object
-sky		= Sky(nside)
-# Create the magnetic field object
-magfield	= MagField_1fil(size_box,Npix_box,12345,direction='+z')
 # Create the filament population object
-population	= FilPop_1fil(Nfil,magfield)
+population	= FilPop_1fil(Nfil)
 
 (h,w)	= pl.figaspect(3/5.)
 fig		= pl.figure(figsize=(h,w))
@@ -50,6 +47,3 @@ for direc in ['-z','45deg','+y']:
 
 pl.tight_layout()
 pl.savefig('QU_sign.pdf',format='pdf')
-#pl.show()
-
-#sky.save_sky(output_tqumap)

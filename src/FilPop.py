@@ -68,9 +68,8 @@ class FilPop:
 
 class FilPop_1fil:
 	# This is to test with a single filament
-	def __init__(self,Nfil,magfield):
+	def __init__(self,Nfil):
 		self.Nfil		= Nfil
-		self.magfield	= magfield
 		self.max_length	= 8.0
 		self.centers	= np.array([[20,0,0]])	
 		self.angles		= np.array([[0.0,0.0]])

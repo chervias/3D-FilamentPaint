@@ -53,17 +53,17 @@ class Filament:
 		(Sx,Sy,Sz) = self.sizes
 		matrix = np.zeros((8,3))
 		# X element of vertices 1,2,3,4
-		matrix[0,0] = matrix[1,0] = matrix[2,0]=matrix[3,0] = +3*Sx
+		matrix[0,0] = matrix[1,0] = matrix[2,0]=matrix[3,0] = +5*Sx
 		# X element of vertices 5,6,7,8
-		matrix[4,0] = matrix[5,0] = matrix[6,0]=matrix[7,0] = -3*Sx
+		matrix[4,0] = matrix[5,0] = matrix[6,0]=matrix[7,0] = -5*Sx
 		# Y element of vertices 1,4,5,8
-		matrix[0,1] = matrix[3,1] = matrix[4,1]=matrix[7,1] = -3*Sy
+		matrix[0,1] = matrix[3,1] = matrix[4,1]=matrix[7,1] = -5*Sy
 		# Y elemeny of vertices 2,3,6,7
-		matrix[1,1] = matrix[2,1] = matrix[5,1]=matrix[6,1] = +3*Sy
+		matrix[1,1] = matrix[2,1] = matrix[5,1]=matrix[6,1] = +5*Sy
 		# Z element of vertices 1,2,5,6
-		matrix[0,2] = matrix[1,2] = matrix[4,2]=matrix[5,2] = +3*Sz
+		matrix[0,2] = matrix[1,2] = matrix[4,2]=matrix[5,2] = +5*Sz
 		# Z element of vertices 3,4,7,8
-		matrix[2,2] = matrix[3,2] = matrix[6,2]=matrix[7,2] = -3*Sz
+		matrix[2,2] = matrix[3,2] = matrix[6,2]=matrix[7,2] = -5*Sz
 		return matrix
 
 	def xyz_vertices(self):
