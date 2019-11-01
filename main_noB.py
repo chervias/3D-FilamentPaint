@@ -1,10 +1,12 @@
+import sys
+sys.path.insert(0,'src')
 import numpy as np
 import healpy as hp
 import matplotlib.pyplot as pl
-from src/Functions import *
-from src/Sky import Sky
-from src/MagField_noB import MagField_noB
-from src/FilPop import FilPop
+from Functions import *
+from Sky import Sky
+from MagField_noB import MagField_noB
+from FilPop import FilPop
 import multiprocessing as mp
 
 output_tqumap	= 'test_ns512_Nf10k.fits'

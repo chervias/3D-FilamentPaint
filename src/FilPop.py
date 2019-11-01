@@ -2,13 +2,15 @@ import scipy.stats
 import numpy as np
 
 class FilPop:
-	def __init__(self,Nfil,magfield):
-		self.Nfil		= Nfil
-		self.magfield	= magfield
-		self.max_length	= 8.0
+	def __init__(self,Nfil,theta_LH_RMS,magfield):
+		self.Nfil			= Nfil
+		self.magfield		= magfield
+		self.max_length		= 8.0
+		self.theta_LH_RMS	= theta_LH_RMS
 		self.centers	= self.get_centers()	
 		self.angles		= self.get_angles()
 		self.sizes		= self.get_sizes()
+
 	def get_centers(self):
 		centers	= np.zeros((self.Nfil,3))
 		# recipe to generate random centers
@@ -26,11 +28,24 @@ class FilPop:
 		angles			= np.zeros((self.Nfil,2))
 		# get the euler angles according to the local magnetic field in the center pixel. The hatZ vector of the filament (long axis) follows local B
 		local_magfield	= np.array([self.magfield.interp_fn((self.centers[n,0],self.centers[n,1],self.centers[n,2])) for n in range(self.Nfil)])
-		local_norm		= np.linalg.norm(local_magfield,axis=1)
+		# unit vector along the local mag field
+		hatZ			= np.array([local_magfield[n,:]/np.linalg.norm(local_magfield[n,:]) for n in range(self.Nfil)])
+		# we need a second unit vector hatY perpendicular to hatZ
+		vecY			= np.cross(hatZ,np.array([1,1,1]))
+		hatY			= np.array([vecY[n,:]/np.linalg.norm(vecY[n,:]) for n in range(self.Nfil)])
+		# This is in radians
+		theta_LH		= np.radians(np.fabs(np.random.normal(0,self.theta_LH_RMS,self.Nfil)))
+		phi				= np.random.uniform(0,2*np.pi,self.Nfil)
+		# We rotate hatZ around hatY by theta_LH using Rodrigues formula
+		hatZprime		= np.array([hatZ[n,:]*np.cos(theta_LH[n]) + np.cross(hatY[n,:],hatZ[n,:])*np.sin(theta_LH[n]) + hatY[n,:]*np.dot(hatY[n,:],hatZ[n,:])*(1 - np.cos(theta_LH[n])) for n in range(self.Nfil)])
+		# We rotate hatZprime around hatZ by phi using Rodrigues formula
+		hatZprime2		= np.array([hatZprime[n,:]*np.cos(phi[n]) + np.cross(hatZ[n,:],hatZprime[n,:])*np.sin(phi[n]) + hatZ[n,:]*np.dot(hatZ[n,:],hatZprime[n,:])*(1 - np.cos(phi[n])) for n in range(self.Nfil)])
+		# Now hatZprime2 is the direction of the long axis of the filament
+		norm_hatZprime2	= np.linalg.norm(hatZprime2,axis=1)
 		# alpha angle
-		angles[:,0]		= np.arccos(local_magfield[:,2]/local_norm)
+		angles[:,0]		= np.arccos(hatZprime2[:,2]/norm_hatZprime2)
 		# beta angle
-		angles[:,1]		= np.arctan2(local_magfield[:,1],local_magfield[:,0])
+		angles[:,1]		= np.arctan2(hatZprime2[:,1],hatZprime2[:,0])
 		return angles	
 	def get_sizes(self):
 		# The sizes will be the ellipsoid semi axes a,b,c with a=b<c
