@@ -9,7 +9,7 @@ class MagField_noB:
 		self.interp_fn		= self.get_interpolator()
 	
 	def get_MagField(self):
-		Bcube					= np.load(self.filename,)
+		Bcube					= np.load(self.filename)
 		return Bcube
 	def get_interpolator(self):
 		real_units				= np.linspace(-0.5*self.size,+0.5*self.size,self.pixels)
