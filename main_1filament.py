@@ -9,24 +9,26 @@ from MagField import MagField_1fil
 from FilPop import FilPop_1fil
 import multiprocessing as mp
 
-nside			= 256
+nside			= 1024
 Npix_box		= 256
 Nfil			= 1
-size_box		= 100.0 # physical size box
+size_box		= 2000.0 # physical size box
 
-# Create the filament population object
-population	= FilPop_1fil(Nfil)
-
-(h,w)	= pl.figaspect(3/5.)
+(h,w)	= pl.figaspect(1.)
 fig		= pl.figure(figsize=(h,w))
+
+center  = [900,0,0]
+sizes	= [0.1,0.1,1.0]
+magfield = MagField_1fil(size_box,Npix_box,12345,'+z')
 
 minP 	= -0.05
 maxP	= +0.05
 
 c = 0
-for direc in ['-z','45deg','+y']:
+for theta_LH in [0,22.5,45,67.5,90]:
+#for theta_LH in [90]:
 	sky			= Sky(nside)
-	magfield	= MagField_1fil(size_box,Npix_box,12345,direc)
+	population	= FilPop_1fil(center,sizes,theta_LH,magfield)
 	t,q,u		= paint_filament(0,sky,population,magfield)
 	sky.Tmap 	+= t
 	sky.Qmap 	+= q
@@ -38,12 +40,12 @@ for direc in ['-z','45deg','+y']:
 
 	#sky.mask[pix_filament]	= 1.0
 	#hp.mollview(sky.mask,nest=False)
-	hp.gnomview(sky.Tmap,rot=(0,0),nest=False,reso=15,fig=1,sub=(3,5,c+1),title='T '+direc,notext=True,cbar=False,cmap='bwr')
-	hp.gnomview(sky.Qmap,rot=(0,0),nest=False,reso=15,fig=1,sub=(3,5,c+2),title='Q '+direc,notext=True,cbar=False,min=minP,max=maxP,cmap='bwr')
-	hp.gnomview(sky.Umap,rot=(0,0),nest=False,reso=15,fig=1,sub=(3,5,c+3),title='U '+direc,notext=True,cbar=False,min=minP,max=maxP,cmap='bwr')
-	hp.gnomview(Emap,rot=(0,0),nest=False,reso=15,fig=1,sub=(3,5,c+4),title='E '+direc,notext=True,cbar=False,min=minP,max=maxP,cmap='bwr')
-	hp.gnomview(Bmap,rot=(0,0),nest=False,reso=15,fig=1,sub=(3,5,c+5),title='B '+direc,notext=True,cbar=False,min=minP,max=maxP,cmap='bwr')
+	hp.gnomview(sky.Tmap,rot=(0,0),nest=False,reso=15,fig=1,sub=(5,5,c+1),title='T %.1f'%(theta_LH),notext=True,cbar=False,cmap='bwr')
+	hp.gnomview(sky.Qmap,rot=(0,0),nest=False,reso=15,fig=1,sub=(5,5,c+2),title='Q %.1f'%(theta_LH),notext=True,cbar=False,min=minP,max=maxP,cmap='bwr')
+	hp.gnomview(sky.Umap,rot=(0,0),nest=False,reso=15,fig=1,sub=(5,5,c+3),title='U %.1f'%(theta_LH),notext=True,cbar=False,min=minP,max=maxP,cmap='bwr')
+	hp.gnomview(Emap,rot=(0,0),nest=False,reso=15,fig=1,sub=(5,5,c+4),title='E %.1f'%(theta_LH),notext=True,cbar=False,min=minP,max=maxP,cmap='bwr')
+	hp.gnomview(Bmap,rot=(0,0),nest=False,reso=15,fig=1,sub=(5,5,c+5),title='B %.1f'%(theta_LH),notext=True,cbar=False,min=minP,max=maxP,cmap='bwr')
 	c  = c + 5
 
-pl.tight_layout()
+#pl.tight_layout()
 pl.savefig('QU_sign.pdf',format='pdf')
