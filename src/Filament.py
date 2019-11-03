@@ -21,7 +21,7 @@ class Filament:
 		sa = np.sin(a) ; sb = np.sin(b)
 		matrix      = np.zeros((3,3))
 		matrix[0,0] = ca*cb
-		matrix[1,0] = cb*sa
+		matrix[1,0] = sa*cb
 		matrix[2,0] = -sb
 		matrix[0,1] = -sa
 		matrix[1,1] = ca
@@ -31,22 +31,6 @@ class Filament:
 		matrix[2,2] = cb
 		return matrix
 		
-	def rot_matrix_ZXZ(self):
-		# Given the 3 proper euler angles, return the Z1X2Z3 rotation matrix
-		(a,b,g)			= self.angles
-		ca = np.cos(a) ; cb = np.cos(b) ; cg = np.cos(g)
-		sa = np.sin(a) ; sb = np.sin(b) ; sg = np.sin(g)
-		matrix      = np.zeros((3,3))
-		matrix[0,0] = ca*cg - cb*sa*sg
-		matrix[1,0] = cg*sa + ca*cb*sg
-		matrix[2,0] = sb*sg
-		matrix[0,1] = -ca*sg - cb*cg*sa
-		matrix[1,1] = ca*cb*cg - sa*sg
-		matrix[2,1] = cg*sb
-		matrix[0,2] = sa*sb
-		matrix[1,2] = -ca*sb
-		matrix[2,2] = cb
-		return matrix
 	def XYZ_vertices(self):
 		#return the eight vertices defined by the cuboid in the XYZ coordinates
 		# Sx, Sy, Sz correspond to a,b,c of each filament

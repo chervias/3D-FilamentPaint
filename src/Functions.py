@@ -21,6 +21,7 @@ def distances(filament,sky,idx_pixel):
 		if 0<=projection10<=np.linalg.norm(filament.xyz_edges_vectors[k,0,:]) and 0<=projection30<=np.linalg.norm(filament.xyz_edges_vectors[k,1,:]):
 			# face k does intersect the ray r*hat(r)
 			id_faces.append(k)
+	#print(id_faces)
 	return radii_intersect[id_faces]
 
 def density(r,filament,sky,idx_pixel):
@@ -69,6 +70,7 @@ def paint_filament(n,sky,population,magfield):
 	angles 			= population.angles[n]
 	center 			= population.centers[n]
 	filament		= Filament(center,sizes,angles)
+#	print(filament.xyz_normal)
 	pix_filament	= filament.do_query_polygon(sky)
 	T_map			= np.zeros(12*sky.nside**2)
 	Q_map			= np.zeros(12*sky.nside**2)
