@@ -17,9 +17,8 @@ size_box		= 2000.0 # physical size box
 (h,w)	= pl.figaspect(1.0)
 fig		= pl.figure(figsize=(h,w))
 
-center  	= [30,0,0]
+center  	= [15,0,0]
 sizes		= [0.1,0.1,1.0]
-theta_LH 	= 45.0
 magfield 	= MagField_1fil(size_box,Npix_box,12345,'+z')
 
 minP 	= -0.05
@@ -45,6 +44,6 @@ for theta_LH in [0,22.5,45,67.5,90]:
 	hp.gnomview(Bmap,rot=(0,0),nest=False,reso=15,fig=1,sub=(5,5,c+5),title='B %.1f'%(theta_LH),notext=True,cbar=False,min=minP,max=maxP,cmap='bwr')
 	c = c + 5
 
-#pl.tight_layout()
-#pl.savefig('QU_sign.pdf',format='pdf')
-pl.show()
+pl.tight_layout()
+pl.savefig('QU_sign.pdf',format='pdf')
+#pl.show()
