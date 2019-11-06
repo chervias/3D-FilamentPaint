@@ -9,12 +9,12 @@ from MagField_noB import MagField_noB
 from FilPop import FilPop
 import multiprocessing as mp
 
-output_tqumap	= 'test_ns512_Nf10k.fits'
+output_tqumap	= 'test_ns512_Nf100k.fits'
 nside			= 512
 Npix_box		= 256
 theta_LH_RMS	= 50.0 # in degrees
-Nfil			= 10000
-size_box		= 402.0 # physical size box
+Nfil			= 100000
+size_box		= 808.0 # physical size box
 # Create the sky object
 sky			= Sky(nside)
 # Create the magnetic field object

@@ -29,7 +29,7 @@ def density(r,filament,sky,idx_pixel):
 	XYZ_coord	= np.matmul(filament.inv_rot_matrix,r*sky.r_unit_vectors[idx_pixel] - np.array(filament.center))
 	radius		= np.sqrt((XYZ_coord[0]/filament.sizes[0])**2 + (XYZ_coord[1]/filament.sizes[1])**2 + (XYZ_coord[2]/filament.sizes[2])**2)
 	# This includes Larson's law density prop to size**-1.1
-	profile		= (filament.sizes[2])**(-1.1)*np.exp(-radius)
+	profile		= np.exp(-radius)
 	return profile
 
 def Bxyz(r_array,filament,sky,idx_pixel,magfield):
