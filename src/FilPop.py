@@ -17,7 +17,7 @@ class FilPop:
 		# Usually this will be done in spherical coordinates
 		# the center cannot leave the box within where B is defined
 		# maximum radial distance of a center is 0.5*size - 5*max_length
-		radii_random	= np.random.uniform((0.1*self.magfield.size)**3,(0.5*self.magfield.size - 5*self.max_length)**3,self.Nfil)**(1./3.)
+		radii_random	= np.random.uniform((0.05*self.magfield.size)**3,(0.5*self.magfield.size - 5*self.max_length)**3,self.Nfil)**(1./3.)
 		phi_random		= 2*np.pi*np.random.uniform(0.0,1.0,self.Nfil)
 		theta_random	= np.arccos(1.0 - 2*np.random.uniform(0.0,1.0,self.Nfil))
 		centers[:,0]	= radii_random*np.sin(theta_random)*np.cos(phi_random)
