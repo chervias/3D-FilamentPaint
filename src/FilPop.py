@@ -34,10 +34,10 @@ class FilPop:
 		hatY			= np.array([vecY[n,:]/np.linalg.norm(vecY[n,:]) for n in range(self.Nfil)])
 		# This is in radians
 		#theta_LH		= np.radians(np.fabs(np.random.normal(0,self.theta_LH_RMS,self.Nfil)))
-                theta_LH = np.zeros(self.Nfil)
-                #phi			= np.random.uniform(0,2*np.pi,self.Nfil)
-                phi = np.zeros(self.Nfil)
-                # We rotate hatZ around hatY by theta_LH using Rodrigues formula
+		theta_LH = np.zeros(self.Nfil)
+		#phi			= np.random.uniform(0,2*np.pi,self.Nfil)
+		phi = np.zeros(self.Nfil)
+		# We rotate hatZ around hatY by theta_LH using Rodrigues formula
 		hatZprime		= np.array([hatZ[n,:]*np.cos(theta_LH[n]) + np.cross(hatY[n,:],hatZ[n,:])*np.sin(theta_LH[n]) + hatY[n,:]*np.dot(hatY[n,:],hatZ[n,:])*(1 - np.cos(theta_LH[n])) for n in range(self.Nfil)])
 		# We rotate hatZprime around hatZ by phi using Rodrigues formula
 		hatZprime2		= np.array([hatZprime[n,:]*np.cos(phi[n]) + np.cross(hatZ[n,:],hatZprime[n,:])*np.sin(phi[n]) + hatZ[n,:]*np.dot(hatZ[n,:],hatZprime[n,:])*(1 - np.cos(phi[n])) for n in range(self.Nfil)])
@@ -47,14 +47,14 @@ class FilPop:
 		angles[:,1]		= np.arccos(hatZprime2[:,2]/norm_hatZprime2)
 		# beta angle
 		angles[:,0]		= np.arctan2(hatZprime2[:,1],hatZprime2[:,0])
-		return angles	
+		return angles
 	def get_sizes(self):
 		# The sizes will be the ellipsoid semi axes a,b,c with a=b<c
 		sizes			= np.zeros((self.Nfil,3))
 		c_semiaxis		= 1 + np.random.pareto(4.6-1,size=self.Nfil)
 		sizes[:,2]		= np.clip(c_semiaxis,0,self.max_length)
-		sizes[:,0]		= 0.1*sizes[:,2]
-		sizes[:,1]		= 0.1*sizes[:,2]
+		sizes[:,0]		= 0.25*sizes[:,2]
+		sizes[:,1]		= 0.25*sizes[:,2]
 		return sizes
 
 class FilPop_1fil:
