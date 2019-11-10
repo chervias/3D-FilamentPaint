@@ -14,9 +14,9 @@ nside			= 512
 Npix_box		= 256
 theta_LH_RMS	= 50.0 # in degrees
 Nfil			= 10000
-size_box		= 1400.0 # physical size box
+size_box		= 1500.0 # physical size box
 # Create the sky object
-sky			= Sky(nside)
+sky				= Sky(nside)
 # Create the magnetic field object
 magfield		= MagField_noB(size_box,'magfield_Bcube.npy')
 # Create the filament population object
