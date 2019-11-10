@@ -6,7 +6,10 @@ class FilPop:
 		self.magfield		= magfield
 		self.max_length		= 10.0
 		self.size_ratio		= 0.25
-		self.theta_LH_RMS	= np.radians(theta_LH_RMS)
+		if theta_LH_RMS == None:
+			self.theta_LH_RMS	= None
+		else:
+			self.theta_LH_RMS	= np.radians(theta_LH_RMS)
 		self.centers		= self.get_centers()	
 		self.angles			= self.get_angles()
 		self.sizes			= self.get_sizes()
@@ -27,27 +30,36 @@ class FilPop:
 		angles			= np.zeros((self.Nfil,2))
 		# get the euler angles according to the local magnetic field in the center pixel. The hatZ vector of the filament (long axis) follows local B
 		local_magfield	= np.array([self.magfield.interp_fn((self.centers[n,0],self.centers[n,1],self.centers[n,2])) for n in range(self.Nfil)])
-		# unit vector along the local mag field
-		hatZ			= np.array([local_magfield[n,:]/np.linalg.norm(local_magfield[n,:]) for n in range(self.Nfil)])
-		# we need a second unit vector hatY perpendicular to hatZ
-		vecY			= np.cross(hatZ,np.array([0,1,0]))
-		hatY			= np.array([vecY[n,:]/np.linalg.norm(vecY[n,:]) for n in range(self.Nfil)])
-		# This is in radians
-		theta_LH		= np.fabs(np.random.normal(0,self.theta_LH_RMS,self.Nfil))
-		#theta_LH = np.zeros(self.Nfil)
-		phi			= np.random.uniform(0,2*np.pi,self.Nfil)
-		#phi = np.zeros(self.Nfil)
-		# We rotate hatZ around hatY by theta_LH using Rodrigues formula
-		hatZprime		= np.array([hatZ[n,:]*np.cos(theta_LH[n]) + np.cross(hatY[n,:],hatZ[n,:])*np.sin(theta_LH[n]) + hatY[n,:]*np.dot(hatY[n,:],hatZ[n,:])*(1 - np.cos(theta_LH[n])) for n in range(self.Nfil)])
-		# We rotate hatZprime around hatZ by phi using Rodrigues formula
-		hatZprime2		= np.array([hatZprime[n,:]*np.cos(phi[n]) + np.cross(hatZ[n,:],hatZprime[n,:])*np.sin(phi[n]) + hatZ[n,:]*np.dot(hatZ[n,:],hatZprime[n,:])*(1 - np.cos(phi[n])) for n in range(self.Nfil)])
-		# Now hatZprime2 is the direction of the long axis of the filament
-		norm_hatZprime2	= np.linalg.norm(hatZprime2,axis=1)
-		# alpha angle
-		angles[:,1]		= np.arccos(hatZprime2[:,2]/norm_hatZprime2)
-		# beta angle
-		angles[:,0]		= np.arctan2(hatZprime2[:,1],hatZprime2[:,0])
-		return angles
+		if self.theta_LH_RMS == None:
+			# unit vector along the local mag field
+			hatZ			= np.array([local_magfield[n,:]/np.linalg.norm(local_magfield[n,:]) for n in range(self.Nfil)])
+			# alpha angle
+			angles[:,1]		= np.arccos(hatZ[:,2])
+			# beta angle
+			angles[:,0]		= np.arctan2(hatZ[:,1],hatZ[:,0])
+			return angles
+		else:
+			# unit vector along the local mag field
+			hatZ			= np.array([local_magfield[n,:]/np.linalg.norm(local_magfield[n,:]) for n in range(self.Nfil)])
+			# we need a second unit vector hatY perpendicular to hatZ
+			vecY			= np.cross(hatZ,np.array([0,1,0]))
+			hatY			= np.array([vecY[n,:]/np.linalg.norm(vecY[n,:]) for n in range(self.Nfil)])
+			# This is in radians
+			theta_LH		= np.fabs(np.random.normal(0,self.theta_LH_RMS,self.Nfil))
+			#theta_LH = np.zeros(self.Nfil)
+			phi				= np.random.uniform(0,2*np.pi,self.Nfil)
+			#phi = np.zeros(self.Nfil)
+			# We rotate hatZ around hatY by theta_LH using Rodrigues formula
+			hatZprime		= np.array([hatZ[n,:]*np.cos(theta_LH[n]) + np.cross(hatY[n,:],hatZ[n,:])*np.sin(theta_LH[n]) + hatY[n,:]*np.dot(hatY[n,:],hatZ[n,:])*(1 - np.cos(theta_LH[n])) for n in range(self.Nfil)])
+			# We rotate hatZprime around hatZ by phi using Rodrigues formula
+			hatZprime2		= np.array([hatZprime[n,:]*np.cos(phi[n]) + np.cross(hatZ[n,:],hatZprime[n,:])*np.sin(phi[n]) + hatZ[n,:]*np.dot(hatZ[n,:],hatZprime[n,:])*(1 - np.cos(phi[n])) for n in range(self.Nfil)])
+			# Now hatZprime2 is the direction of the long axis of the filament
+			norm_hatZprime2	= np.linalg.norm(hatZprime2,axis=1)
+			# alpha angle
+			angles[:,1]		= np.arccos(hatZprime2[:,2]/norm_hatZprime2)
+			# beta angle
+			angles[:,0]		= np.arctan2(hatZprime2[:,1],hatZprime2[:,0])
+			return angles
 	def get_sizes(self):
 		# The sizes will be the ellipsoid semi axes a,b,c with a=b<c
 		sizes			= np.zeros((self.Nfil,3))

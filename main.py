@@ -10,11 +10,11 @@ from FilPop import FilPop
 import multiprocessing as mp
 
 output_tqumap	= 'test.fits'
-nside			= 256
+nside			= 512
 Npix_box		= 256
-Nfil			= 100
-theta_LH_RMS	= 50.0 # in degrees
-size_box		= 200.0 # physical size box
+Nfil			= 7
+theta_LH_RMS	= 10. # in degrees
+size_box		= 1500.0 # physical size box
 # Create the sky object
 sky				= Sky(nside)
 # Create the magnetic field object
@@ -37,4 +37,4 @@ for x in p.imap_unordered(paint_filament_aux, data,chunksize=2):
 #hp.mollview(sky.Umap,nest=False)
 #pl.show()
 
-#sky.save_sky(output_tqumap)
+sky.save_sky(output_tqumap)
