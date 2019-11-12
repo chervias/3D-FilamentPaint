@@ -1,11 +1,11 @@
 import numpy as np
 
 class FilPop:
-	def __init__(self,Nfil,theta_LH_RMS,magfield):
+	def __init__(self,Nfil,theta_LH_RMS,size_ratio,magfield):
 		self.Nfil			= Nfil
 		self.magfield		= magfield
 		self.max_length		= 10.0
-		self.size_ratio		= 0.25
+		self.size_ratio		= size_ratio
 		if theta_LH_RMS == None:
 			self.theta_LH_RMS	= None
 		else:
