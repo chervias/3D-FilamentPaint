@@ -11,9 +11,9 @@ class FilPop:
 			self.theta_LH_RMS	= None
 		else:
 			self.theta_LH_RMS	= np.radians(theta_LH_RMS)
-		self.centers		= self.get_centers()	
-		self.angles			= self.get_angles()
-		self.sizes			= self.get_sizes()
+		self.centers				= self.get_centers()	
+		self.angles,self.long_vec	= self.get_angles()
+		self.sizes					= self.get_sizes()
 	def get_centers(self):
 		centers	= np.zeros((self.Nfil,3))
 		# recipe to generate random centers
@@ -28,7 +28,9 @@ class FilPop:
 		centers[:,2]	= radii_random*np.cos(theta_random)
 		return centers
 	def get_angles(self):
-		angles			= np.zeros((self.Nfil,2))
+		angles			= np.zeros((self.Nfil,2))		
+		long_axis_vec 	= np.zeros((self.Nfil,3))
+
 		# get the euler angles according to the local magnetic field in the center pixel. The hatZ vector of the filament (long axis) follows local B
 		local_magfield	= np.array([self.magfield.interp_fn((self.centers[n,0],self.centers[n,1],self.centers[n,2])) for n in range(self.Nfil)])
 		if self.theta_LH_RMS == None:
@@ -60,7 +62,7 @@ class FilPop:
 			angles[:,1]		= np.arccos(hatZprime2[:,2]/norm_hatZprime2)
 			# beta angle
 			angles[:,0]		= np.arctan2(hatZprime2[:,1],hatZprime2[:,0])
-			return angles
+			return angles,hatZprime2
 	def get_sizes(self):
 		# The sizes will be the ellipsoid semi axes a,b,c with a=b<c
 		sizes			= np.zeros((self.Nfil,3))
