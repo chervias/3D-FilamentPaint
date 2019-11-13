@@ -40,7 +40,7 @@ class FilPop:
 			angles[:,1]		= np.arccos(hatZ[:,2])
 			# beta angle
 			angles[:,0]		= np.arctan2(hatZ[:,1],hatZ[:,0])
-			return angles
+			return angles,hatZ
 		else:
 			# unit vector along the local mag field
 			hatZ			= np.array([local_magfield[n,:]/np.linalg.norm(local_magfield[n,:]) for n in range(self.Nfil)])
