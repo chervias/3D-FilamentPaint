@@ -20,8 +20,10 @@ sky				= Sky(nside)
 # Create the magnetic field object
 magfield		= MagField(size_box,Npix_box,12345)
 # Create the filament population object
-population		= FilPop(Nfil,theta_LH_RMS,size_ratio,1,magfield)
-population2		= FilPop(Nfil,theta_LH_RMS,size_ratio,0.7,magfield)
+population		= FilPop(Nfil,theta_LH_RMS,size_ratio,1,magfield,fixed_distance=True)
+population2		= FilPop(Nfil,theta_LH_RMS,size_ratio,0.7,magfield,fixed_distance=True)
+
+ax = pl.gca()
 
 angsize		= np.zeros((Nfil,2))
 for n in range(Nfil):
@@ -32,7 +34,8 @@ for n in range(Nfil):
 	Radial_distance	= np.linalg.norm(population.centers[n])
 	angsize[n,0]	= np.sqrt(np.sin(LOS_angle)**2 + size_ratio**2*np.cos(LOS_angle)**2) * 2*population.sizes[n,2] / Radial_distance
 
-pl.hist(2*np.pi/angsize[:,0],np.linspace(2,8*nside,200),histtype='step',label='Size scale = 1')
+#ax.hist(2*np.pi/angsize[:,0],np.linspace(2,8*nside,200),histtype='step',label='Size scale = 1')
+ax.hist(angsize[:,0],np.linspace(0,0.02,200),histtype='step',label='Size scale = 1')
 	
 angsize		= np.zeros((Nfil,2))
 for n in range(Nfil):
@@ -43,14 +46,13 @@ for n in range(Nfil):
 	Radial_distance	= np.linalg.norm(population2.centers[n])
 	angsize[n,0]	= np.sqrt(np.sin(LOS_angle)**2 + size_ratio**2*np.cos(LOS_angle)**2) * 2*population2.sizes[n,2] / Radial_distance
 
-pl.hist(2*np.pi/angsize[:,0],np.linspace(2,8*nside,200),histtype='step',color='green',label='Size scale = 0.7')
-
-ax = pl.gca()
+#ax.hist(2*np.pi/angsize[:,0],np.linspace(2,8*nside,200),histtype='step',color='green',label='Size scale = 0.7')
+ax.hist(angsize[:,0],np.linspace(0,0.02,200),histtype='step',color='green',label='Size scale = 0.7')
 
 ax.set_title('%i filaments'%Nfil)
-ax.axvline(3*nside,c='red')
-ax.set_xlabel(r'multipole $\ell$')
-ax.set_xlim(0,8*nside)
+#ax.axvline(3*nside,c='red')
+ax.set_xlabel(r'Angular size [rad]')
+#ax.set_xlim(0,8*nside)
 ax.legend(loc='best')
 
 #pl.show()
