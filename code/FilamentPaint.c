@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <FilamentPaint.h>
+//#include <FilamentPaint.h>
+#include <query_polygon_wrapper.h>
 
 double** FilamentPaint_RotationMatrix(double angles_arr[2]){
 	static double rot_matrix[3][3];
@@ -125,4 +126,24 @@ double*** FilamentPaint_xyzEdgeVectors(double xyz_faces[6][4][3]){
 	}
 	return xyz_edges;
 }
-
+long* FilamentPaint_DoQueryPolygon(long nside_long,double xyz_faces[6][4][3], long n_ipix){
+	int i=0,j,k;
+//	for (i=0;i<1;i++){
+		// transform the vector to an angle
+		static double theta[4],phi[4];
+		for (j=0;j<4;j++){
+			double radius=0.0;
+			for (k=0;k<3;k++){
+				radius = radius + pow(xyz_faces[i][j][k],2);
+			}
+			theta[j]	= atan2(xyz_faces[i][j][1],xyz_faces[i][j][0]);
+			phi[j]		= acos(xyz_faces[i][j][2]/sqrt(radius));
+		}
+		// on each face, do a query polygon
+		long *ipix_face	= calloc(12*nside_long*nside_long,sizeof(long));
+		long n_ipix_face;
+		query_polygon_wrapper(theta,phi,nside_long,ipix_face,n_ipix_face);
+//	}
+	n_ipix = n_ipix_face ;
+	return ipix_face;
+}

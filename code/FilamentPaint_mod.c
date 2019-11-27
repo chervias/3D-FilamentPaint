@@ -7,7 +7,7 @@
 
 static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	/* Getting the elements */
-	PyObject *sizes,*Sizes_total,*angles,*Angles_total,*centers,*Centers_total;
+	PyObject *sizes,*Sizes_total,*angles,*Angles_total,*centers,*Centers_total,*nside,*Nside_value;
 	PyObject *n = NULL;
 	PyObject *Sky=NULL;
 	PyObject *Population=NULL;
@@ -24,7 +24,12 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	Angles_total 		= PyObject_GetAttr(Population,angles);
 	centers				= PyUnicode_FromString("centers");
 	Centers_total 		= PyObject_GetAttr(Population,centers);
-		
+	// Query the attributes on the Sky object
+	nside				= PyUnicode_FromString("nside");
+	Nside_value			= PyObject_GetAttr(Sky,nside);
+	long nside_long		= PyLong_AsLong(Nside_value);
+	
+	
 	/* We want the filament n*/
 	long n_fil			= PyLong_AsLong(n);
 	for (k=0;k<3;k++){
@@ -45,6 +50,12 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	double*** xyz_faces				= FilamentPaint_xyzFaces(xyz_vertices);
 	// Calculate the edges vectors
 	double*** xyz_edges				= FilamentPaint_xyzEdgeVectors(xyz_faces);
+	// Calculate the polygon 
+	long *ipix						= calloc(12*nside_long*nside_long,sizeof(long));
+	long n_ipix;
+	ipix 							= FilamentPaint_DoQueryPolygon(nside_long,xyz_faces,n_ipix);
+	
+	printf("%d\n",n_ipix);
 	
 	int nd=3;
 	npy_intp dims[3] = {6,2,3};

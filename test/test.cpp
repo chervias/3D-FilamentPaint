@@ -4,28 +4,45 @@
 #include <pointing.h>
 #include <vec3.h>
 #include <vector>
-  
+#include <cmath>
+
 using namespace std; 
   
-int main(){ 
-	// prints hello world 
-	//cout<<"Hello World\n";
-
-	//vec3_t<float64> b 	= vec3_t<float64>(-0.1,0.1,1.0) ;
-	//vec3_t<float64> c 	= vec3_t<float64>(-0.1,-0.1,1.0) ;
-	//vec3_t<float64> d 	= vec3_t<float64>(0.1,-0.1,1.0) ;
+int main(){ 	
+	pointing a,b,c,d;
+	a.theta 	= 0.5*M_PI - 0.01;
+	a.phi		= 0.01;
 	
-	pointing aa;
-	aa.theta 	=0.0;
-	aa.phi		=0.0;
+	b.theta 	= 0.5*M_PI - 0.01;
+	b.phi		= -0.01;
 	
-	std::vector<pointing> vertices;
-	vertices.push_back(aa);
-	vertices.push_back(aa);
-	vertices.push_back(aa);
-	vertices.push_back(aa);
+	c.theta 	= 0.5*M_PI + 0.01;
+	c.phi		=-0.1;
 	
-	std::cout << "Size: " << vertices.size() << '\n';
+	d.theta 	= 0.5*M_PI + 0.01;
+	d.phi		=+0.1;
+	
+	vector<pointing> vertices;
+	
+	vertices.push_back(a);
+	vertices.push_back(b);
+	vertices.push_back(c);
+	vertices.push_back(d);
+	
+	int nside=512;
+	
+	T_Healpix_Base<int> hp_base(nside,RING,SET_NSIDE);
+	rangeset<int> ipix;		
+	hp_base.query_polygon(vertices,ipix);
+	
+	vector<int> v = ipix.toVector();
+	
+	// Using a for loop with index
+	for(std::size_t i = 0; i < v.size(); ++i) {
+		std::cout << v[i] << "\n";
+	}
+	
+	//std::cout << "pixels: " << pixels << '\n';
 	
 	
 
