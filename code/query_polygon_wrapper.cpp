@@ -11,7 +11,7 @@ extern "C" {
 		pointing a,b,c,d;
 		a.theta=theta[0]; b.theta=theta[1];c.theta=theta[2];d.theta=theta[3];
 		a.phi=phi[0];b.phi=phi[1];c.phi=phi[2];d.phi=phi[3];
-		vector<pointing> vertices;
+		std::vector<pointing> vertices;
 
 		vertices.push_back(a);
 		vertices.push_back(b);
@@ -21,13 +21,13 @@ extern "C" {
 		T_Healpix_Base<long> hp_base(nside,RING,SET_NSIDE); 
 		rangeset<long> ipix;	
 		hp_base.query_polygon(vertices,ipix);
-		vector<long> v = ipix.toVector();
+		std::vector<long> v = ipix.toVector();
 		
 		n_ipix	= v.size();
 
 		for(std::size_t i = 0; i < v.size(); ++i) {
 			//std::cout << v[i] << "\n";
-			ipix_arr[i]	= v[i]
+			ipix_arr[i]	= v[i];
 		}
 		return;
 	}

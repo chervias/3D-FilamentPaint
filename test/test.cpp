@@ -22,7 +22,7 @@ int main(){
 	d.theta 	= 0.5*M_PI + 0.01;
 	d.phi		=+0.1;
 	
-	vector<pointing> vertices;
+	std::vector<pointing> vertices;
 	
 	vertices.push_back(a);
 	vertices.push_back(b);
@@ -32,19 +32,15 @@ int main(){
 	int nside=512;
 	
 	T_Healpix_Base<int> hp_base(nside,RING,SET_NSIDE);
-	rangeset<int> ipix;		
-	hp_base.query_polygon(vertices,ipix);
+	//rangeset<long> ipix;		
+	//hp_base.query_polygon(vertices,ipix);
 	
-	vector<int> v = ipix.toVector();
+	//vector<int> v = ipix.toVector();
 	
 	// Using a for loop with index
-	for(std::size_t i = 0; i < v.size(); ++i) {
-		std::cout << v[i] << "\n";
-	}
+	//for(std::size_t i = 0; i < v.size(); ++i) {
+	//	std::cout << v[i] << "\n";
+	//}
 	
-	//std::cout << "pixels: " << pixels << '\n';
-	
-	
-
 	return 0; 
 } 

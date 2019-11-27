@@ -1,9 +1,9 @@
 
 FLAGS 		= 
 
-HEALPIX_LIBS = -L/home/chervias/Software/anaconda3/envs/healpy/lib -lhealpix_cxx -lcxxsupport -lsharp -lfftpack -lc_utils -lcfitsio
+HEALPIX_LIBS = -L/Users/chervias/Software/miniconda3/envs/cmb/lib -lhealpix_cxx -lcxxsupport -lsharp -lfftpack -lc_utils -lcfitsio
 #HEALPIX_LIBS = -lhealpix_cxx -lcxxsupport -lsharp -lfftpack -lc_utils -lcfitsio
-HEALPIX_INCLUDE = -I/home/chervias/Software/anaconda3/envs/healpy/include/healpix_cxx
+HEALPIX_INCLUDE = -I/Users/chervias/Software/miniconda3/envs/cmb/include/healpix_cxx
 
 OBJS = test.o
 
