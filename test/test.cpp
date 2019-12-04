@@ -31,16 +31,16 @@ int main(){
 	
 	int nside=512;
 	
-	T_Healpix_Base<int> hp_base(nside,RING,SET_NSIDE);
-	//rangeset<long> ipix;		
-	//hp_base.query_polygon(vertices,ipix);
+	T_Healpix_Base<long> hp_base(nside,RING,SET_NSIDE);
+	rangeset<long> ipix;		
+	hp_base.query_polygon(vertices,ipix);
 	
-	//vector<int> v = ipix.toVector();
+	vector<long> v = ipix.toVector();
 	
 	// Using a for loop with index
-	//for(std::size_t i = 0; i < v.size(); ++i) {
-	//	std::cout << v[i] << "\n";
-	//}
+	for(std::size_t i = 0; i < v.size(); ++i) {
+		std::cout << v[i] << "\n";
+	}
 	
 	return 0; 
 } 

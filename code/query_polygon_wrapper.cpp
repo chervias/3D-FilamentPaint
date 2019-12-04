@@ -6,7 +6,7 @@
 #include <cmath>
 
 extern "C" {
-	void query_polygon_wrapper(double theta[4], double phi[4], long nside, long* ipix_arr, long n_ipix){
+	void query_polygon_wrapper(double theta[4], double phi[4], long nside, long* ipix_arr, long* nipix){
 		// theta and phi are array with size 4
 		pointing a,b,c,d;
 		a.theta=theta[0]; b.theta=theta[1];c.theta=theta[2];d.theta=theta[3];
@@ -22,13 +22,9 @@ extern "C" {
 		rangeset<long> ipix;	
 		hp_base.query_polygon(vertices,ipix);
 		std::vector<long> v = ipix.toVector();
-		
-		n_ipix	= v.size();
-
+		*nipix	= v.size();
 		for(std::size_t i = 0; i < v.size(); ++i) {
-			//std::cout << v[i] << "\n";
 			ipix_arr[i]	= v[i];
 		}
-		return;
 	}
 }

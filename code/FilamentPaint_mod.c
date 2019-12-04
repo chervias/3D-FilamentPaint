@@ -7,31 +7,41 @@
 
 static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	/* Getting the elements */
-	PyObject *sizes,*Sizes_total,*angles,*Angles_total,*centers,*Centers_total,*nside,*Nside_value;
+	PyObject *Sizes_total=NULL,*Angles_total=NULL,*Centers_total=NULL,*Nside_value=NULL,*rUnitVectors=NULL ;
+	PyObject *Npix_cube_obj=NULL,*Bcube_obj=NULL,*Size_obj=NULL,*LocalTriad_obj=NULL ;
 	PyObject *n = NULL;
 	PyObject *Sky=NULL;
 	PyObject *Population=NULL;
 	PyObject *MagField=NULL;
 	double sizes_arr[3], angles_arr[2], centers_arr[3] ;
-	int i,j,k;
-	
+	int i,j,k,l;
+    
 	if (!PyArg_ParseTuple(args, "OOOO", &n, &Sky, &Population, &MagField))
 		return NULL;
-	/* Query for the attribute sizes of the Population object*/
-	sizes				= PyUnicode_FromString("sizes");
-	Sizes_total 		= PyObject_GetAttr(Population,sizes);	
-	angles				= PyUnicode_FromString("angles");
-	Angles_total 		= PyObject_GetAttr(Population,angles);
-	centers				= PyUnicode_FromString("centers");
-	Centers_total 		= PyObject_GetAttr(Population,centers);
-	// Query the attributes on the Sky object
-	nside				= PyUnicode_FromString("nside");
-	Nside_value			= PyObject_GetAttr(Sky,nside);
+	
+	/* Extract the attribute from Population object*/
+	Sizes_total 		= PyObject_GetAttr(Population,PyUnicode_FromString("sizes"));	
+	Angles_total 		= PyObject_GetAttr(Population,PyUnicode_FromString("angles"));
+	Centers_total 		= PyObject_GetAttr(Population,PyUnicode_FromString("centers"));
+	
+	// Extract the attributes from Sky object
+	Nside_value			= PyObject_GetAttr(Sky,PyUnicode_FromString("nside"));
 	long nside_long		= PyLong_AsLong(Nside_value);
+    rUnitVectors        = PyObject_GetAttr(Sky,PyUnicode_FromString("r_unit_vectors"));
+    LocalTriad_obj		= PyObject_GetAttr(Sky,PyUnicode_FromString("local_triad"));
 	
-	
+	// Extract the attributes from MagField object
+	Npix_cube_obj		= PyObject_GetAttr(MagField,PyUnicode_FromString("pixels")) ;
+	int Npix_cube		= (int) PyLong_AsLong(Npix_cube_obj);
+	Size_obj			= PyObject_GetAttr(MagField,PyUnicode_FromString("size")) ;
+	double Size			= PyFloat_AsDouble(Size_obj);
+	Bcube_obj			= PyObject_GetAttr(MagField,PyUnicode_FromString("Bcube")) ;
+    
+	int npix			= 12*nside_long*nside_long;
+
 	/* We want the filament n*/
 	long n_fil			= PyLong_AsLong(n);
+	// Extract from Population object
 	for (k=0;k<3;k++){
 		sizes_arr[k]	= *(double*)PyArray_GETPTR2(Sizes_total, n_fil, k);
 		centers_arr[k]	= *(double*)PyArray_GETPTR2(Centers_total, n_fil, k);
@@ -42,6 +52,7 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	
 	/* Calculate the rot matrix */
 	double** rot_matrix 			= FilamentPaint_RotationMatrix(angles_arr);	
+	double** inv_rot_matrix		= FilamentPaint_InvertRotMat(rot_matrix);
 	/* Calculate the 8 vertices in the xyz coordinates */
 	double** xyz_vertices			= FilamentPaint_xyzVertices(rot_matrix,sizes_arr,centers_arr);
 	/* Calculate normal to faces rotated */
@@ -50,17 +61,44 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	double*** xyz_faces				= FilamentPaint_xyzFaces(xyz_vertices);
 	// Calculate the edges vectors
 	double*** xyz_edges				= FilamentPaint_xyzEdgeVectors(xyz_faces);
+	double*** xyz_edges_unit        = FilamentPaint_xyzEdgeVectorsUnit(xyz_edges);
 	// Calculate the polygon 
-	long *ipix						= calloc(12*nside_long*nside_long,sizeof(long));
-	long n_ipix;
-	ipix 							= FilamentPaint_DoQueryPolygon(nside_long,xyz_faces,n_ipix);
+	long* ipix = calloc(npix,sizeof(long)); 
+	long nipix;
+	FilamentPaint_DoQueryPolygon(nside_long,xyz_faces,ipix,&nipix);
+	long* ipix_final = calloc(nipix,sizeof(long));
+	for (j=0;j<nipix;j++)
+		ipix_final[j] = ipix[j] ;
+	free(ipix);
 	
-	printf("%d\n",n_ipix);
+	// initialize the healpix map
+	double* TQUmap	= calloc(3*npix,sizeof(double)) ;
 	
-	int nd=3;
-	npy_intp dims[3] = {6,2,3};
-	PyObject *arr = PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE,xyz_edges);
-	PyArray_ENABLEFLAGS((PyArrayObject *)arr, NPY_OWNDATA);	
+	// Cycle through each of the pixels in ipix
+	printf("Filament %i has %i pixels \n",n_fil,nipix) ;
+	for (i=0;i<nipix;i++){
+		int index_pix = ipix_final[i];
+		// Get the hat(r) vector for pixel index_pixel
+		double rUnitVector_ipix[3];
+		double LocalTriad_ipix[3][3];
+		for (j=0;j<3;j++){
+			rUnitVector_ipix[j] = *(double*)PyArray_GETPTR2(rUnitVectors, index_pix, j);
+			for (k=0;k<3;k++){
+				LocalTriad_ipix[k][j]	= *(double*)PyArray_GETPTR3(LocalTriad_obj, index_pix, k, j) ;
+			}
+		}
+		double* rDistances 		= FilamentPaint_CalculateDistances(xyz_normal_to_faces,xyz_faces,xyz_edges,xyz_edges_unit,rUnitVector_ipix);
+		double* integ			= FilamentPaint_Integrator(rDistances[0],rDistances[1],inv_rot_matrix,rUnitVector_ipix,LocalTriad_ipix,centers_arr,sizes_arr,Bcube_obj,Size,Npix_cube) ;
+
+		for (j=0;j<3;j++){
+			TQUmap[j*npix + index_pix]	= integ[j] ;
+		}
+    }
+	free(ipix_final);
+	
+	npy_intp npy_shape[2] = {3,npix};
+	PyObject *arr 		= PyArray_SimpleNewFromData(2,npy_shape, NPY_DOUBLE, TQUmap);
+	PyArray_ENABLEFLAGS((PyArrayObject *)arr, NPY_OWNDATA);
 	return(arr);
 }
 
