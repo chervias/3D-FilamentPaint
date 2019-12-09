@@ -14,7 +14,7 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	PyObject *Population=NULL;
 	PyObject *MagField=NULL;
 	double sizes_arr[3], angles_arr[2], centers_arr[3] ;
-	int i,j,k,l;
+	int i,j,k;
     
 	if (!PyArg_ParseTuple(args, "OOOO", &n, &Sky, &Population, &MagField))
 		return NULL;
@@ -72,7 +72,7 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	free(ipix);
 	
 	// initialize the healpix map
-	double* TQUmap	= calloc(3*npix,sizeof(double)) ;
+	double* TQUmap	= calloc(3*npix,sizeof(double));
 	
 	// Cycle through each of the pixels in ipix
 	printf("Filament %i has %i pixels \n",n_fil,nipix) ;
