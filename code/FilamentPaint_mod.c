@@ -52,7 +52,7 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	
 	/* Calculate the rot matrix */
 	double** rot_matrix 			= FilamentPaint_RotationMatrix(angles_arr);	
-	double** inv_rot_matrix		= FilamentPaint_InvertRotMat(rot_matrix);
+	double** inv_rot_matrix			= FilamentPaint_InvertRotMat(rot_matrix);
 	/* Calculate the 8 vertices in the xyz coordinates */
 	double** xyz_vertices			= FilamentPaint_xyzVertices(rot_matrix,sizes_arr,centers_arr);
 	/* Calculate normal to faces rotated */
@@ -75,7 +75,7 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	double* TQUmap	= calloc(3*npix,sizeof(double));
 	
 	// Cycle through each of the pixels in ipix
-	printf("Filament %i has %i pixels \n",n_fil,nipix) ;
+	//printf("Filament %i has %i pixels \n",n_fil,nipix) ;
 	for (i=0;i<nipix;i++){
 		int index_pix = ipix_final[i];
 		// Get the hat(r) vector for pixel index_pixel
@@ -116,13 +116,9 @@ static struct PyModuleDef FilamentPaint_module = {
     FilamentPaintMethods
 };
 
-PyMODINIT_FUNC PyInit_FilamentPaint(void)
-{
+PyMODINIT_FUNC PyInit_FilamentPaint(void){
   PyObject *m;
-
   m = PyModule_Create(&FilamentPaint_module);
-  
   import_array();  // This is important for using the numpy_array api, otherwise segfaults!
-
   return(m);
 }

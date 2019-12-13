@@ -4,7 +4,7 @@ import healpy as hp
 import matplotlib.pyplot as pl
 
 import sys
-sys.path.insert(0,'../src')
+sys.path.insert(0,'../code')
 from Sky import Sky
 from MagField import MagField
 from FilPop import FilPop
