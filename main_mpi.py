@@ -8,13 +8,13 @@ from Sky import Sky
 from MagField import MagField
 from FilPop import FilPop
 
-output_tqumap	= 'test.fits'
+output_tqumap	= 'test_ns512_112k_maa40_sr0p1_sl4p6.fits'
 nside			= 512
 Npix_box		= 256
-theta_LH_RMS	= None # in degrees
+theta_LH_RMS	= 40. # in degrees
 size_scale		= 0.7
-size_ratio		= 0.25
-Nfil			= 32000
+size_ratio		= 0.1
+Nfil			= 112000
 size_box		= 1500.0 # physical size box
 
 comm = MPI.COMM_WORLD
@@ -28,7 +28,7 @@ if rank==0:
 	# Create the magnetic field object
 	magfield		= MagField(size_box,Npix_box,12345)
 	# Create the filament population object
-	population		= FilPop(Nfil,theta_LH_RMS,size_ratio,size_scale,magfield,fixed_distance=True)
+	population		= FilPop(Nfil,theta_LH_RMS,size_ratio,size_scale,magfield,fixed_distance=False)
 else:
 	sky = None
 	magfield = None
@@ -55,7 +55,6 @@ tqu_total = np.zeros((3,12*nside**2))
 
 for n in rcv_buff:
 	#print('Process=',rank,'is working on filament',n,end='')
-	#backline()
 	tqu_total			+= FilamentPaint.Paint_Filament(n,sky,population,magfield)
 
 # put a barrier to make sure all processeses are finished
@@ -67,9 +66,9 @@ else:
 	tqu_final = None
 # use MPI to get the totals 
 comm.Reduce([tqu_total, MPI.DOUBLE],[tqu_final, MPI.DOUBLE],op = MPI.SUM,root = 0)
-sky.Tmap = tqu_final[0,:]
-sky.Qmap = tqu_final[1,:]
-sky.Umap = tqu_final[2,:]
 
 if rank==0:
+	sky.Tmap = tqu_final[0,:]
+	sky.Qmap = tqu_final[1,:]
+	sky.Umap = tqu_final[2,:]
 	sky.save_sky(output_tqumap)
