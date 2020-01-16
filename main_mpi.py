@@ -8,12 +8,13 @@ from Sky import Sky
 from MagField import MagField
 from FilPop import FilPop
 
-output_tqumap	= 'test_ns512_112k_maa40_sr0p1_sl4p6.fits'
+output_tqumap	= 'test_ns512_112k_maa45_sr0p1_sl5p0.fits'
 nside			= 512
 Npix_box		= 256
-theta_LH_RMS	= 40. # in degrees
+theta_LH_RMS	= 45. # in degrees
 size_scale		= 0.7
 size_ratio		= 0.1
+slope			= 5.0
 Nfil			= 112000
 size_box		= 1500.0 # physical size box
 
@@ -28,7 +29,7 @@ if rank==0:
 	# Create the magnetic field object
 	magfield		= MagField(size_box,Npix_box,12345)
 	# Create the filament population object
-	population		= FilPop(Nfil,theta_LH_RMS,size_ratio,size_scale,magfield,fixed_distance=False)
+	population		= FilPop(Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,fixed_distance=False)
 else:
 	sky = None
 	magfield = None

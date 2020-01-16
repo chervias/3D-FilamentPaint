@@ -1,11 +1,12 @@
 import numpy as np
 
 class FilPop:
-	def __init__(self,Nfil,theta_LH_RMS,size_ratio,size_scale,magfield,fixed_distance=False):
+	def __init__(self,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,fixed_distance=False):
 		self.Nfil			= Nfil
 		self.magfield		= magfield
 		self.fixed_distance	= fixed_distance
 		self.max_length		= 15.0
+		self.slope			= slope
 		self.size_scale		= size_scale
 		self.size_ratio		= size_ratio
 		if theta_LH_RMS == None:
@@ -70,7 +71,7 @@ class FilPop:
 	def get_sizes(self):
 		# The sizes will be the ellipsoid semi axes a,b,c with a=b<c
 		sizes			= np.zeros((self.Nfil,3))
-		c_semiaxis		= self.size_scale*(1.0+np.random.pareto(4.6-1,size=self.Nfil))
+		c_semiaxis		= self.size_scale*(1.0+np.random.pareto(self.slope-1,size=self.Nfil))
 		sizes[:,2]		= np.clip(c_semiaxis,0,self.max_length)
 		sizes[:,0]		= self.size_ratio*sizes[:,2]
 		sizes[:,1]		= self.size_ratio*sizes[:,2]
