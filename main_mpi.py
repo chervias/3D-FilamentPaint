@@ -8,19 +8,24 @@ from Sky import Sky
 from MagField import MagField
 from FilPop import FilPop
 
-output_tqumap	= 'test_ns512_112k_maa45_sr0p1_sl5p0.fits'
-nside			= 512
+# usage: python main_mpi.py Nfils nside theta_LH size_ratio slope size_box
+
+nside			= int(sys.argv[2])
 Npix_box		= 256
-theta_LH_RMS	= 45. # in degrees
+theta_LH_RMS	= float(sys.argv[3]) # in degrees
 size_scale		= 0.7
-size_ratio		= 0.1
-slope			= 5.0
-Nfil			= 112000
-size_box		= 1500.0 # physical size box
+size_ratio		= float(sys.argv[4])
+slope			= float(sys.argv[5])
+Nfil			= int(sys.argv[1])
+size_box		= float(sys.argv[6]) # physical size box
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
+
+if rank==0:
+	output_tqumap	= 'test_ns1024/tqumap_ns%s_%s_maa%s_sr%s_sl%s_sbox%s.fits'%(str(nside),str(Nfil),str(theta_LH_RMS).replace('.','p'),str(size_ratio).replace('.','p'),str(slope).replace('.','p'),str(int(size_box)))
+	print(output_tqumap)
 
 # rank=0 process will create the objects and distribute them
 if rank==0:
