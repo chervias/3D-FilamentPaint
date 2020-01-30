@@ -8,12 +8,12 @@ from Sky import Sky
 from MagField import MagField
 from FilPop import FilPop
 
-# usage: python main_mpi.py Nfils nside theta_LH size_ratio slope size_box
+# usage: python main_mpi.py Nfils nside theta_LH size_ratio slope size_box size_scale
 
 nside			= int(sys.argv[2])
 Npix_box		= 256
-theta_LH_RMS	= float(sys.argv[3]) # in degrees
-size_scale		= 0.7
+theta_LH_RMS	= float(sys.argv[3]) # in degrees, if -1 all filaments point up
+size_scale		= float(sys.argv[7]) # size scale
 size_ratio		= float(sys.argv[4])
 slope			= float(sys.argv[5])
 Nfil			= int(sys.argv[1])
@@ -24,8 +24,8 @@ rank = comm.Get_rank()
 size = comm.Get_size()
 
 if rank==0:
-	output_tqumap	= 'test_ns1024/tqumap_ns%s_%s_maa%s_sr%s_sl%s_sbox%s.fits'%(str(nside),str(Nfil),str(theta_LH_RMS).replace('.','p'),str(size_ratio).replace('.','p'),str(slope).replace('.','p'),str(int(size_box)))
-	print(output_tqumap)
+	output_tqumap	= 'test_ns1024_forTemperature/tqumap_ns%s_%s_maa%s_sr%s_sl%s_minsize%s_wLarson.fits'%(str(nside),str(Nfil),str(theta_LH_RMS).replace('.','p'),str(size_ratio).replace('.','p'),str(slope).replace('.','p'),str(size_scale).replace('.','p'))
+	#print(output_tqumap)
 
 # rank=0 process will create the objects and distribute them
 if rank==0:
@@ -34,7 +34,7 @@ if rank==0:
 	# Create the magnetic field object
 	magfield		= MagField(size_box,Npix_box,12345)
 	# Create the filament population object
-	population		= FilPop(Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,fixed_distance=False)
+	population		= FilPop(nside,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,fixed_distance=False)
 else:
 	sky = None
 	magfield = None
@@ -45,7 +45,6 @@ else:
 sky 		= comm.bcast(sky,root=0)
 magfield 	= comm.bcast(magfield,root=0)
 population	= comm.bcast(population,root=0)
-#print(rank,population)
 #exit()
 
 # rank=0 will create an array with size Nfil

@@ -1,16 +1,19 @@
 import numpy as np
 
 class FilPop:
-	def __init__(self,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,fixed_distance=False):
+	def __init__(self,nside,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,fixed_distance=False):
+		self.nside			= nside
 		self.Nfil			= Nfil
 		self.magfield		= magfield
 		self.fixed_distance	= fixed_distance
-		self.max_length		= 15.0
+		self.max_length		= 1.0
 		self.slope			= slope
 		self.size_scale		= size_scale
 		self.size_ratio		= size_ratio
 		if theta_LH_RMS == None:
 			self.theta_LH_RMS	= None
+		elif theta_LH_RMS == -1.0:
+			self.theta_LH_RMS	= -1.0
 		else:
 			self.theta_LH_RMS	= np.radians(theta_LH_RMS)
 		self.centers				= self.get_centers()	
@@ -25,17 +28,17 @@ class FilPop:
 		if self.fixed_distance:
 			radii_random	= np.ones(self.Nfil) * 0.4*self.magfield.size
 		else:
-			radii_random	= np.random.uniform((0.05*self.magfield.size)**3,(0.5*self.magfield.size - 5*self.max_length)**3,self.Nfil)**(1./3.)
+			radii_random	= np.random.uniform((0.01*self.magfield.size)**3,(0.5*self.magfield.size - 5*self.max_length)**3,self.Nfil)**(1./3.)
+		
 		phi_random		= 2*np.pi*np.random.uniform(0.0,1.0,self.Nfil)
 		theta_random	= np.arccos(1.0 - 2*np.random.uniform(0.0,1.0,self.Nfil))
+		
 		centers[:,0]	= radii_random*np.sin(theta_random)*np.cos(phi_random)
 		centers[:,1]	= radii_random*np.sin(theta_random)*np.sin(phi_random)
 		centers[:,2]	= radii_random*np.cos(theta_random)
 		return centers
 	def get_angles(self):
-		angles			= np.zeros((self.Nfil,2))		
-		long_axis_vec 	= np.zeros((self.Nfil,3))
-
+		angles			= np.zeros((self.Nfil,2))
 		# get the euler angles according to the local magnetic field in the center pixel. The hatZ vector of the filament (long axis) follows local B
 		local_magfield	= np.array([self.magfield.interp_fn((self.centers[n,0],self.centers[n,1],self.centers[n,2])) for n in range(self.Nfil)])
 		if self.theta_LH_RMS == None:
@@ -46,6 +49,15 @@ class FilPop:
 			# beta angle
 			angles[:,0]		= np.arctan2(hatZ[:,1],hatZ[:,0])
 			return angles,hatZ
+		elif self.theta_LH_RMS == -1:
+			# we want a unit vector that is ort to center vector
+			ort_vec 		= np.array([np.cross(self.centers[n],np.array([1,1,1])) for n in range(self.Nfil)])
+			ort_vec_unit	= np.array([ort_vec[n,:]/np.linalg.norm(ort_vec[n,:]) for n in range(self.Nfil)])
+			# alpha angle
+			angles[:,1]		= np.arccos(ort_vec_unit[:,2])
+			# beta angle
+			angles[:,0]		= np.arctan2(ort_vec_unit[:,1],ort_vec_unit[:,0])
+			return angles,ort_vec_unit
 		else:
 			# unit vector along the local mag field
 			hatZ			= np.array([local_magfield[n,:]/np.linalg.norm(local_magfield[n,:]) for n in range(self.Nfil)])

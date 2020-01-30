@@ -368,11 +368,13 @@ double* FilamentPaint_Integrator(double r1, double r2, double rot_matrix[3][3], 
 	double sumT=0.0, sumQ=0.0, sumU=0.0 ;
 	for (i=0;i<5;i++){
 		double y		= (b-a)*(x[i]+1)/2.0 + a ;
+		// this now includes Larson's law
+		double density_0 = pow(sizes_arr[2],-1.1) ;
 		double density	= FilamentPaint_Density(y,rot_matrix,rUnitVector_ipix,centers_arr,sizes_arr) ;
 		double* result	= FilamentPaint_Bxyz(y,Bcube_obj,size_box,nbox,rUnitVector_ipix,local_triad) ;
-		sumT 			= sumT + w[i]*density ;
-		sumQ			= sumQ + w[i]*density*(pow(result[1],2) - pow(result[0],2))/result[3] ;
-		sumU			= sumU + w[i]*density*(-2.0)*result[1]*result[0]/result[3] ;
+		sumT 			= sumT + w[i]*density_0*density ;
+		sumQ			= sumQ + w[i]*density_0*density*(pow(result[1],2) - pow(result[0],2))/result[3] ;
+		sumU			= sumU + w[i]*density_0*density*(-2.0)*result[1]*result[0]/result[3] ;
 	}
 	integ[0] 		= (b-a)/2.0*sumT ;
 	integ[1]		= (b-a)/2.0*sumQ ;
