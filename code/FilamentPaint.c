@@ -38,7 +38,7 @@ double** FilamentPaint_InvertRotMat(double rot_matrix[3][3]){
 	return inv_rot_matrix;
 }
 
-double** FilamentPaint_xyzVertices(double rot_matrix[3][3], double sizes_arr[3], double centers_arr[3]){
+double** FilamentPaint_xyzVertices(double rot_matrix[3][3], double sizes_arr[3], double centers_arr[3], double Size, int* isInside){
 	/* This calculates the vertices of the cuboid in the xyz fixed coord */
 	static double xyz_vertices[8][3],XYZ_vertices[8][3];
 	int i,j,k;
@@ -63,6 +63,16 @@ double** FilamentPaint_xyzVertices(double rot_matrix[3][3], double sizes_arr[3],
 				sum = sum + rot_matrix[j][k]*XYZ_vertices[i][k] ;
 			}
 			xyz_vertices[i][j] = sum + centers_arr[j];
+		}
+	}
+	
+	// Check if the vertices are outside the box
+	// It will be 1. It will be changed to 0 if the condition is True
+	for (i=0;i<8;i++){
+		for (j=0;j<3;j++){
+			if (xyz_vertices[i][j] < -0.5*Size || +0.5*Size < xyz_vertices[i][j]){
+				*isInside = 0 ;
+			}
 		}
 	}
 	return xyz_vertices;
@@ -277,7 +287,6 @@ double* FilamentPaint_TrilinearInterpolation(PyObject* Bcube_obj, double size_bo
 	// vector is the vector for which we want to know the interpolated value
 	// This follows https://en.wikipedia.org/wiki/Trilinear_interpolation
 	int i;
-	//printf("valueeeeee %.10E \n",Bcube[100][110][120][0]);
 	
 	// First, we need to get the indices of the cube where vector lives
 	int idx_x1 	= ceil(vector[0]*(nbox-1)/size_box + 0.5*(nbox-1.));

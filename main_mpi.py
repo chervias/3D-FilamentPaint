@@ -34,7 +34,7 @@ if rank==0:
 	# Create the magnetic field object
 	magfield		= MagField(size_box,Npix_box,12345)
 	# Create the filament population object
-	population		= FilPop(nside,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,fixed_distance=False)
+	population		= FilPop(nside,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,1234,fixed_distance=True)
 else:
 	sky = None
 	magfield = None
