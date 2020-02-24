@@ -37,3 +37,13 @@ class Sky:
 		
 	def save_sky(self,name):
 		hp.write_map(name,[self.Tmap,self.Qmap,self.Umap],nest=False,overwrite=True)
+
+class SkyAux:
+	def __init__(self,nside):
+		self.nside								= nside
+		self.Tmap								= None
+		self.Qmap								= None
+		self.Umap								= None
+		self.mask								= None
+		self.r_unit_vectors						= None
+		self.local_triad						= None

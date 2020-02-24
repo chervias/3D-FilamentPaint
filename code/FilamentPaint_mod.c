@@ -80,7 +80,7 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 		free(ipix);
 		
 		// Cycle through each of the pixels in ipix
-		//printf("Filament %i has %i pixels \n",n_fil,nipix) ;
+		printf("Filament %i has %i pixels \n",n_fil,nipix) ;
 		for (i=0;i<nipix;i++){
 			int index_pix = ipix_final[i];
 			// Get the hat(r) vector for pixel index_pixel

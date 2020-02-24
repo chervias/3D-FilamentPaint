@@ -4,7 +4,7 @@ import healpy as hp
 from mpi4py import MPI
 import sys
 sys.path.insert(0,'code')
-from Sky import Sky
+from Sky import Sky,SkyAux
 from MagField import MagField
 from FilPop import FilPop
 
@@ -24,28 +24,36 @@ rank = comm.Get_rank()
 size = comm.Get_size()
 
 if rank==0:
-	output_tqumap	= 'test_ns1024_forTemperature/tqumap_ns%s_%s_maa%s_sr%s_sl%s_minsize%s_wLarson.fits'%(str(nside),str(Nfil),str(theta_LH_RMS).replace('.','p'),str(size_ratio).replace('.','p'),str(slope).replace('.','p'),str(size_scale).replace('.','p'))
+	output_tqumap	= 'test_ns2048/tqumap_ns%s_%s_maa%s_sr%s_sl%s_minsize%s_wLarson.fits'%(str(nside),str(Nfil),str(theta_LH_RMS).replace('.','p'),str(size_ratio).replace('.','p'),str(slope).replace('.','p'),str(size_scale).replace('.','p'))
 	#print(output_tqumap)
 
 # rank=0 process will create the objects and distribute them
 if rank==0:
 	# Create the sky object
 	sky				= Sky(nside)
+	r_unit_vectors  = sky.r_unit_vectors
+	local_triad     = sky.local_triad
+	skyaux          = SkyAux(nside)
 	# Create the magnetic field object
 	magfield		= MagField(size_box,Npix_box,12345)
 	# Create the filament population object
 	population		= FilPop(nside,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,1234,fixed_distance=True)
 else:
-	sky = None
-	magfield = None
-	population = None
+	skyaux         = SkyAux(nside)
+	r_unit_vectors = np.empty((12*nside**2,3))
+	local_triad    = np.empty((12*nside**2,3,3))
+	magfield       = None
+	population     = None
 
-#print(rank,population)
 # Broadcast the objects
-sky 		= comm.bcast(sky,root=0)
+# The Sky object is too big to be broadcasted. I will broadcast its elements and 
+comm.Bcast(r_unit_vectors,root=0)
+comm.Bcast(local_triad,root=0)
+skyaux.r_unit_vectors = r_unit_vectors
+skyaux.local_triad    = local_triad
+
 magfield 	= comm.bcast(magfield,root=0)
 population	= comm.bcast(population,root=0)
-#exit()
 
 # rank=0 will create an array with size Nfil
 Nscatter = Nfil // size
@@ -60,7 +68,7 @@ tqu_total = np.zeros((3,12*nside**2))
 
 for n in rcv_buff:
 	#print('Process=',rank,'is working on filament',n,end='')
-	tqu_total			+= FilamentPaint.Paint_Filament(n,sky,population,magfield)
+	tqu_total			+= FilamentPaint.Paint_Filament(n,skyaux,population,magfield)
 
 # put a barrier to make sure all processeses are finished
 comm.Barrier()
