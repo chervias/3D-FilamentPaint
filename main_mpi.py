@@ -4,7 +4,7 @@ import healpy as hp
 from mpi4py import MPI
 import sys
 sys.path.insert(0,'code')
-from Sky import Sky,SkyAux
+from Sky import *
 from MagField import MagField
 from FilPop import FilPop
 
@@ -12,76 +12,90 @@ from FilPop import FilPop
 
 nside			= int(sys.argv[2])
 Npix_box		= 256
-theta_LH_RMS	= float(sys.argv[3]) # in degrees, if -1 all filaments point up
+
+try:
+	theta_LH_RMS	= float(sys.argv[3]) # in degrees, if -1 all filaments point up
+except ValueError:
+	theta_LH_RMS	= None
+
 size_scale		= float(sys.argv[7]) # size scale
 size_ratio		= float(sys.argv[4])
 slope			= float(sys.argv[5])
 Nfil			= int(sys.argv[1])
 size_box		= float(sys.argv[6]) # physical size box
 
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
-size = comm.Get_size()
+shared_comm = MPI.COMM_WORLD.Split_type(MPI.COMM_TYPE_SHARED)
+print("Shared comm contains: ", shared_comm.Get_size(), " processes")
+size_pool = shared_comm.Get_size()
+rank = shared_comm.Get_rank()
 
 if rank==0:
 	output_tqumap	= 'test_ns2048/tqumap_ns%s_%s_maa%s_sr%s_sl%s_minsize%s_wLarson.fits'%(str(nside),str(Nfil),str(theta_LH_RMS).replace('.','p'),str(size_ratio).replace('.','p'),str(slope).replace('.','p'),str(size_scale).replace('.','p'))
 	#print(output_tqumap)
 
-# rank=0 process will create the objects and distribute them
+double_size = MPI.DOUBLE.Get_size()
+size = (12*nside**2,3,3)
 if rank==0:
-	# Create the sky object
-	sky				= Sky(nside)
-	r_unit_vectors  = sky.r_unit_vectors
-	local_triad     = sky.local_triad
-	skyaux          = SkyAux(nside)
+	total_size = np.prod(size)
+	nbytes = total_size * double_size
+	print("Expected array size is ", nbytes/(1024.**3), " GB")
+else:
+	nbytes = 0
+
+shared_comm.Barrier()                      
+win = MPI.Win.Allocate_shared(nbytes, double_size, comm=shared_comm)
+# Construct the array                                                                                                                     
+buf, itemsize = win.Shared_query(0)
+_storedZModes = np.ndarray(buffer=buf, dtype=np.double, shape=size)
+
+win.Fence()
+# rank 0 will only fill the array
+if rank==0:
+	r_unit_vectors  = get_r_unit_vectors(nside)
+	local_triad     = get_local_triad(nside,r_unit_vectors)
+	print("RANK: ", shared_comm.Get_rank() , " is filling the array ")
+	win.Put(local_triad,0,0)
+	print("RANK: ", shared_comm.Get_rank() , " SUCCESSFULLY filled the array ")
+win.Fence()
+
+shared_comm.Barrier()
+
+if rank==0:
 	# Create the magnetic field object
 	magfield		= MagField(size_box,Npix_box,12345)
 	# Create the filament population object
-	population		= FilPop(nside,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,1234,fixed_distance=True)
+	population		= FilPop(Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,1234,fixed_distance=False)
 else:
-	skyaux         = SkyAux(nside)
-	r_unit_vectors = np.empty((12*nside**2,3))
-	local_triad    = np.empty((12*nside**2,3,3))
 	magfield       = None
 	population     = None
 
 # Broadcast the objects
-# The Sky object is too big to be broadcasted. I will broadcast its elements and 
-comm.Bcast(r_unit_vectors,root=0)
-comm.Bcast(local_triad,root=0)
-skyaux.r_unit_vectors = r_unit_vectors
-skyaux.local_triad    = local_triad
-
-magfield 	= comm.bcast(magfield,root=0)
-population	= comm.bcast(population,root=0)
+magfield 	= shared_comm.bcast(magfield,root=0)
+population	= shared_comm.bcast(population,root=0)
 
 # rank=0 will create an array with size Nfil
-Nscatter = Nfil // size
-if comm.rank == 0:
+Nscatter = Nfil // size_pool
+if shared_comm.rank == 0:
 	send_buff = np.arange(Nfil, dtype=np.int32)
 else:
 	send_buff = np.empty(Nfil, dtype=np.int32)
 rcv_buff = np.empty(Nscatter, dtype=np.int32)
-comm.Scatter(send_buff, rcv_buff, root=0)
+shared_comm.Scatter(send_buff, rcv_buff, root=0)
 #print('Process',rank,'received the numbers',rcv_buff)
 tqu_total = np.zeros((3,12*nside**2))
 
 for n in rcv_buff:
-	#print('Process=',rank,'is working on filament',n,end='')
-	tqu_total			+= FilamentPaint.Paint_Filament(n,skyaux,population,magfield)
-
+	tqu_total			+= FilamentPaint.Paint_Filament(n,nside,_storedZModes,population,magfield)
 # put a barrier to make sure all processeses are finished
-comm.Barrier()
+shared_comm.Barrier()
 if rank==0:
 	# only processor 0 will actually get the data
 	tqu_final = np.zeros_like(tqu_total)
 else:
 	tqu_final = None
 # use MPI to get the totals 
-comm.Reduce([tqu_total, MPI.DOUBLE],[tqu_final, MPI.DOUBLE],op = MPI.SUM,root = 0)
+shared_comm.Reduce([tqu_total, MPI.DOUBLE],[tqu_final, MPI.DOUBLE],op = MPI.SUM,root = 0)
 
 if rank==0:
-	sky.Tmap = tqu_final[0,:]
-	sky.Qmap = tqu_final[1,:]
-	sky.Umap = tqu_final[2,:]
-	sky.save_sky(output_tqumap)
+	tqu_map = [tqu_final[0,:],tqu_final[1,:],tqu_final[2,:]]
+	hp.write_map(output_tqumap,tqu_map,nest=False,overwrite=True)

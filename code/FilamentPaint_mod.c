@@ -10,13 +10,14 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	PyObject *Sizes_total=NULL,*Angles_total=NULL,*Centers_total=NULL,*Nside_value=NULL,*rUnitVectors=NULL ;
 	PyObject *Npix_cube_obj=NULL,*Bcube_obj=NULL,*Size_obj=NULL,*LocalTriad_obj=NULL ;
 	PyObject *n = NULL;
-	PyObject *Sky=NULL;
+	PyObject *nside = NULL;
+	PyObject *local_triad=NULL;
 	PyObject *Population=NULL;
 	PyObject *MagField=NULL;
 	double sizes_arr[3], angles_arr[2], centers_arr[3] ;
 	int i,j,k,isInside=1;
     
-	if (!PyArg_ParseTuple(args, "OOOO", &n, &Sky, &Population, &MagField))
+	if (!PyArg_ParseTuple(args, "OOOOO",&n, &nside, &local_triad, &Population, &MagField))
 		return NULL;
 	
 	/* Extract the attribute from Population object*/
@@ -24,23 +25,18 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	Angles_total 		= PyObject_GetAttr(Population,PyUnicode_FromString("angles"));
 	Centers_total 		= PyObject_GetAttr(Population,PyUnicode_FromString("centers"));
 	
-	// Extract the attributes from Sky object
-	Nside_value			= PyObject_GetAttr(Sky,PyUnicode_FromString("nside"));
-	long nside_long		= PyLong_AsLong(Nside_value);
-    rUnitVectors        = PyObject_GetAttr(Sky,PyUnicode_FromString("r_unit_vectors"));
-    LocalTriad_obj		= PyObject_GetAttr(Sky,PyUnicode_FromString("local_triad"));
-	
+	long nside_long     = PyLong_AsLong(nside);
+
 	// Extract the attributes from MagField object
 	Npix_cube_obj		= PyObject_GetAttr(MagField,PyUnicode_FromString("pixels")) ;
 	int Npix_cube		= (int) PyLong_AsLong(Npix_cube_obj);
 	Size_obj			= PyObject_GetAttr(MagField,PyUnicode_FromString("size")) ;
 	double Size			= PyFloat_AsDouble(Size_obj);
 	Bcube_obj			= PyObject_GetAttr(MagField,PyUnicode_FromString("Bcube")) ;
-    
-	int npix			= 12*nside_long*nside_long;
-
 	/* We want the filament n*/
 	long n_fil			= PyLong_AsLong(n);
+	long npix			= 12*nside_long*nside_long;
+
 	// Extract from Population object
 	for (k=0;k<3;k++){
 		sizes_arr[k]	= *(double*)PyArray_GETPTR2(Sizes_total, n_fil, k);
@@ -87,9 +83,9 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 			double rUnitVector_ipix[3];
 			double LocalTriad_ipix[3][3];
 			for (j=0;j<3;j++){
-				rUnitVector_ipix[j] = *(double*)PyArray_GETPTR2(rUnitVectors, index_pix, j);
+				rUnitVector_ipix[j] = *(double*)PyArray_GETPTR3(local_triad,index_pix,2,j);
 				for (k=0;k<3;k++){
-					LocalTriad_ipix[k][j]	= *(double*)PyArray_GETPTR3(LocalTriad_obj, index_pix, k, j) ;
+					LocalTriad_ipix[k][j]	= *(double*)PyArray_GETPTR3(local_triad,index_pix, k, j) ;
 				}
 			}
 			double* rDistances 		= FilamentPaint_CalculateDistances(xyz_normal_to_faces,xyz_faces,xyz_edges,xyz_edges_unit,rUnitVector_ipix);

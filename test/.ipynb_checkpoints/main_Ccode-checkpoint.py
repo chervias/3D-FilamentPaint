@@ -1,34 +1,36 @@
 import FilamentPaint
 import sys
-sys.path.insert(0,'../code')
+sys.path.insert(0,'code')
 
 import numpy as np
 import matplotlib.pyplot as pl
 
-from Functions import *
-from Sky import Sky
+from Sky import *
 from MagField import MagField
 from FilPop import FilPop
 
 output_tqumap	= 'test.fits'
-nside			= 512
+nside			= 2048
 Npix_box		= 256
-theta_LH_RMS	= None # in degrees
-size_scale		= 0.7
+theta_LH_RMS	= -1 # in degrees
+size_scale		= 0.1
 size_ratio		= 0.25
 Nfil			= 100
-size_box		= 1800.0 # physical size box
-# Create the sky object
-sky			= Sky(nside)
+size_box		= 400.0 # physical size box
+slope			= 2.4
+
+r_unit_vectors  = get_r_unit_vectors(nside)
+local_triad     = get_local_triad(nside,r_unit_vectors)
+
 # Create the magnetic field object
 magfield		= MagField(size_box,Npix_box,12345)
 # Create the filament population object
-population		= FilPop(Nfil,theta_LH_RMS,size_ratio,size_scale,magfield,fixed_distance=True)
+population		= FilPop(Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,1234,fixed_distance=True)
 
+TQUmap_total = np.zeros((3,12*nside**2))
 for n in range(Nfil):
-	TQUmap			= FilamentPaint.Paint_Filament(n,sky,population,magfield)
-	sky.Tmap 	+= TQUmap[0,:]
-	sky.Qmap 	+= TQUmap[1,:]
-	sky.Umap 	+= TQUmap[2,:]
+	TQUmap			= FilamentPaint.Paint_Filament(n,nside,local_triad,population,magfield)
+	for i in range(3):
+		TQUmap_total[i,:] 	+= TQUmap[i,:]
 
-sky.save_sky(output_tqumap)
+hp.write_map(output_tqumap,TQUmap_total,nest=False,overwrite=True)
