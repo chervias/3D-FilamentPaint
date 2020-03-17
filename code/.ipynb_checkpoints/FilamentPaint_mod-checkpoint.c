@@ -11,14 +11,13 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	PyObject *Npix_cube_obj=NULL,*Bcube_obj=NULL,*Size_obj=NULL,*LocalTriad_obj=NULL ;
 	PyObject *n = NULL;
 	PyObject *nside = NULL;
-	PyObject *r_unit_vectors=NULL;
 	PyObject *local_triad=NULL;
 	PyObject *Population=NULL;
 	PyObject *MagField=NULL;
 	double sizes_arr[3], angles_arr[2], centers_arr[3] ;
 	int i,j,k,isInside=1;
     
-	if (!PyArg_ParseTuple(args, "OOOOOO",&n, &nside, &r_unit_vectors, &local_triad, &Population, &MagField))
+	if (!PyArg_ParseTuple(args, "OOOOO",&n, &nside, &local_triad, &Population, &MagField))
 		return NULL;
 	
 	/* Extract the attribute from Population object*/
@@ -84,13 +83,13 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 			double rUnitVector_ipix[3];
 			double LocalTriad_ipix[3][3];
 			for (j=0;j<3;j++){
-				rUnitVector_ipix[j] = *(double*)PyArray_GETPTR2(r_unit_vectors, index_pix, j);
+				rUnitVector_ipix[j] = *(double*)PyArray_GETPTR3(local_triad,index_pix,2,j);
 				for (k=0;k<3;k++){
 					LocalTriad_ipix[k][j]	= *(double*)PyArray_GETPTR3(local_triad,index_pix, k, j) ;
 				}
 			}
 			double* rDistances 		= FilamentPaint_CalculateDistances(xyz_normal_to_faces,xyz_faces,xyz_edges,xyz_edges_unit,rUnitVector_ipix);
-			double* integ			= FilamentPaint_Integrator(rDistances[0],rDistances[1],inv_rot_matrix,rUnitVector_ipix,LocalTriad_ipix,centers_arr,sizes_arr,Bcube_obj,Size,Npix_cube) ;
+			double* integ= FilamentPaint_Integrator(rDistances[0],rDistances[1],inv_rot_matrix,rUnitVector_ipix,LocalTriad_ipix,centers_arr,sizes_arr,Bcube_obj,Size,Npix_cube);
 
 			for (j=0;j<3;j++){
 				TQUmap[j*npix + index_pix]	= integ[j] ;

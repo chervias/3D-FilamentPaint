@@ -225,13 +225,13 @@ void FilamentPaint_DoQueryPolygon(long nside_long,double xyz_faces[6][4][3], lon
 }
 
 double* FilamentPaint_CalculateDistances(double xyz_normal_to_faces[6][3], double xyz_faces[6][4][3], double xyz_edges[6][2][3], double xyz_edges_unit[6][2][3], double rUnitVector_ipix[3]){
-	// This function receives the Filament matrices and the r_unit_vector of the corresponding pixel and returns the 2 distances
-	static double radii_intersect[6] ;
-	static int id_faces[2] ;
+	// This function receives the Filament matrices and the r_unit_vector of the corresponding pixel and returns the 2 distances of intersection
+	static double radii_intersect[6];
+	static int id_faces[2];
 	int i,j,c=0;
 	for (i=0 ; i<6 ; i++){
 		// iterate over the 6 faces
-		// bottom is the dot product between the normal of face i and r_unit_vector, top is the dot product between the normal and some point in the plane
+		// "bottom" is the dot product between the normal of face i and r_unit_vector, "top" is the dot product between the normal and some point in the plane
 		double bottom=0.0,top=0.0;
 		for (j=0 ; j<3 ; j++){bottom = bottom + xyz_normal_to_faces[i][j]*rUnitVector_ipix[j];}
 		if (bottom==0.0){
@@ -287,22 +287,21 @@ double* FilamentPaint_TrilinearInterpolation(PyObject* Bcube_obj, double size_bo
 	// vector is the vector for which we want to know the interpolated value
 	// This follows https://en.wikipedia.org/wiki/Trilinear_interpolation
 	int i;
-	
 	// First, we need to get the indices of the cube where vector lives
-	int idx_x1 	= ceil(vector[0]*(nbox-1)/size_box + 0.5*(nbox-1.));
-	int idx_x0 	= floor(vector[0]*(nbox-1)/size_box + 0.5*(nbox-1.));
-	int idx_y1 	= ceil(vector[1]*(nbox-1)/size_box + 0.5*(nbox-1.));
-	int idx_y0 	= floor(vector[1]*(nbox-1)/size_box + 0.5*(nbox-1.));
-	int idx_z1 	= ceil(vector[2]*(nbox-1)/size_box + 0.5*(nbox-1.));
-	int idx_z0 	= floor(vector[2]*(nbox-1)/size_box + 0.5*(nbox-1.));
+	int idx_x1 	= ceil(vector[0]*(nbox-1)/size_box + 0.5*(nbox-1.0));
+	int idx_x0 	= floor(vector[0]*(nbox-1)/size_box + 0.5*(nbox-1.0));
+	int idx_y1 	= ceil(vector[1]*(nbox-1)/size_box + 0.5*(nbox-1.0));
+	int idx_y0 	= floor(vector[1]*(nbox-1)/size_box + 0.5*(nbox-1.0));
+	int idx_z1 	= ceil(vector[2]*(nbox-1)/size_box + 0.5*(nbox-1.0));
+	int idx_z0 	= floor(vector[2]*(nbox-1)/size_box + 0.5*(nbox-1.0));
 
 	// map the indices to real coordinates
 	double x0		= size_box*idx_x0/(nbox-1.0) - 0.5*size_box ;
-	double x1		= size_box*idx_x1/(nbox-1.) - 0.5*size_box ;
-	double y0		= size_box*idx_y0/(nbox-1.) - 0.5*size_box ;
-	double y1		= size_box*idx_y1/(nbox-1.) - 0.5*size_box ;	
-	double z0		= size_box*idx_z0/(nbox-1.) - 0.5*size_box ;
-	double z1		= size_box*idx_z1/(nbox-1.) - 0.5*size_box ;
+	double x1		= size_box*idx_x1/(nbox-1.0) - 0.5*size_box ;
+	double y0		= size_box*idx_y0/(nbox-1.0) - 0.5*size_box ;
+	double y1		= size_box*idx_y1/(nbox-1.0) - 0.5*size_box ;	
+	double z0		= size_box*idx_z0/(nbox-1.0) - 0.5*size_box ;
+	double z1		= size_box*idx_z1/(nbox-1.0) - 0.5*size_box ;
 	
 	// Calculate xd,yd,zd
 	double xd		= (vector[0] - x0)/(x1 - x0) ;
@@ -313,26 +312,24 @@ double* FilamentPaint_TrilinearInterpolation(PyObject* Bcube_obj, double size_bo
 	double c00[3],c01[3],c10[3],c11[3] ;
 	for (i=0;i<3;i++){
 		c00[i]		= (*(double*)PyArray_GETPTR4(Bcube_obj,idx_x0,idx_y0,idx_z0,i))*(1.0 - xd) 
-						+ (*(double*)PyArray_GETPTR4(Bcube_obj,idx_x1,idx_y0,idx_z0,i))*xd ;
+					+ (*(double*)PyArray_GETPTR4(Bcube_obj,idx_x1,idx_y0,idx_z0,i))*xd ;
 		c01[i]		= (*(double*)PyArray_GETPTR4(Bcube_obj,idx_x0,idx_y0,idx_z1,i))*(1.0 - xd) 
-						+ (*(double*)PyArray_GETPTR4(Bcube_obj,idx_x1,idx_y0,idx_z1,i))*xd ;
+					+ (*(double*)PyArray_GETPTR4(Bcube_obj,idx_x1,idx_y0,idx_z1,i))*xd ;
 		c10[i]		= (*(double*)PyArray_GETPTR4(Bcube_obj,idx_x0,idx_y1,idx_z0,i))*(1.0 - xd) 
-						+ (*(double*)PyArray_GETPTR4(Bcube_obj,idx_x1,idx_y1,idx_z0,i))*xd ;
+					+ (*(double*)PyArray_GETPTR4(Bcube_obj,idx_x1,idx_y1,idx_z0,i))*xd ;
 		c11[i]		= (*(double*)PyArray_GETPTR4(Bcube_obj,idx_x0,idx_y1,idx_z1,i))*(1.0 - xd) 
-						+ (*(double*)PyArray_GETPTR4(Bcube_obj,idx_x1,idx_y1,idx_z1,i))*xd ;
-	}	
+					+ (*(double*)PyArray_GETPTR4(Bcube_obj,idx_x1,idx_y1,idx_z1,i))*xd ;
+	}
 	// interpolate along y
 	double c0[3],c1[3];
 	for (i=0;i<3;i++){
-		c0[i]		= c00[i]*(1 - yd) + c10[i]*yd ;
-		c1[i]		= c01[i]*(1 - yd) + c11[i]*yd ;
-		//printf("c0 c1 %f %f \n",c0[i],c1[i]);
+		c0[i]		= c00[i]*(1.0 - yd) + c10[i]*yd ;
+		c1[i]		= c01[i]*(1.0 - yd) + c11[i]*yd ;
 	}
 	// interpolate along z
 	static double c[3];
 	for (i=0;i<3;i++){
-		c[i]		= c0[i]*(1-zd) + c1[i]*zd ;
-		//printf("c %f \n",c[i]);
+		c[i]		= c0[i]*(1.0-zd) + c1[i]*zd ;
 	}
 	return c;
 }

@@ -53,7 +53,12 @@ class FilPop:
 		elif self.theta_LH_RMS == -1:
 			# we want a unit vector that is ort to center vector
 			ort_vec 		= np.array([np.cross(self.centers[n],np.array([1,1,1])) for n in range(self.Nfil)])
-			ort_vec_unit	= np.array([ort_vec[n,:]/np.linalg.norm(ort_vec[n,:]) for n in range(self.Nfil)])
+			# hatk is the unit vector along the LOS 
+			hatk = np.array([self.centers[n]/np.linalg.norm(self.centers[n]) for n in range(self.Nfil)])
+			# we rotate the ort vector by a random angle between 0 and 2pi
+			phi_angle   = np.random.uniform(0,2*np.pi,self.Nfil)
+			ort_vec_rotated		= np.array([ort_vec[n]*np.cos(phi_angle[n]) + np.cross(hatk[n],ort_vec[n])*np.sin(phi_angle[n]) + hatk[n]*np.dot(hatk[n],ort_vec[n])*(1 - np.cos(phi_angle[n])) for n in range(self.Nfil)])
+			ort_vec_unit	= np.array([ort_vec_rotated[n]/np.linalg.norm(ort_vec_rotated[n]) for n in range(self.Nfil)])
 			# alpha angle
 			angles[:,1]		= np.arccos(ort_vec_unit[:,2])
 			# beta angle
@@ -63,8 +68,8 @@ class FilPop:
 			# unit vector along the local mag field
 			hatZ			= np.array([local_magfield[n,:]/np.linalg.norm(local_magfield[n,:]) for n in range(self.Nfil)])
 			# we need a second unit vector hatY perpendicular to hatZ
-			random_vectors  = np.random.uniform(0.0,1.0,shape=())
-			vecY			= np.cross(hatZ,np.array([0,1,0]))
+			random_vectors  = np.random.uniform(0.0,1.0,size=(self.Nfil,3))
+			vecY			= np.cross(hatZ,random_vectors)
 			hatY			= np.array([vecY[n,:]/np.linalg.norm(vecY[n,:]) for n in range(self.Nfil)])
 			# This is in radians
 			theta_LH		= np.fabs(np.random.normal(0,self.theta_LH_RMS,self.Nfil))
@@ -77,9 +82,9 @@ class FilPop:
 			hatZprime2		= np.array([hatZprime[n,:]*np.cos(phi[n]) + np.cross(hatZ[n,:],hatZprime[n,:])*np.sin(phi[n]) + hatZ[n,:]*np.dot(hatZ[n,:],hatZprime[n,:])*(1 - np.cos(phi[n])) for n in range(self.Nfil)])
 			# Now hatZprime2 is the direction of the long axis of the filament
 			norm_hatZprime2	= np.linalg.norm(hatZprime2,axis=1)
-			# alpha angle
-			angles[:,1]		= np.arccos(hatZprime2[:,2]/norm_hatZprime2)
 			# beta angle
+			angles[:,1]		= np.arccos(hatZprime2[:,2]/norm_hatZprime2)
+			# alpha angle
 			angles[:,0]		= np.arctan2(hatZprime2[:,1],hatZprime2[:,0])
 			return angles,hatZprime2
 	def get_sizes(self):

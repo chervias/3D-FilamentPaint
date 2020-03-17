@@ -53,7 +53,12 @@ class FilPop:
 		elif self.theta_LH_RMS == -1:
 			# we want a unit vector that is ort to center vector
 			ort_vec 		= np.array([np.cross(self.centers[n],np.array([1,1,1])) for n in range(self.Nfil)])
-			ort_vec_unit	= np.array([ort_vec[n,:]/np.linalg.norm(ort_vec[n,:]) for n in range(self.Nfil)])
+			# hatk is the unit vector along the LOS 
+			hatk = np.array([self.centers[n]/np.linalg.norm(self.centers[n]) for n in range(self.Nfil)])
+			# we rotate the ort vector by a random angle between 0 and 2pi
+			phi_angle   = np.random.uniform(0,2*np.pi,self.Nfil)
+			ort_vec_rotated		= np.array([ort_vec[n]*np.cos(phi_angle[n]) + np.cross(hatk[n],ort_vec[n])*np.sin(phi_angle[n]) + hatk[n]*np.dot(hatk[n],ort_vec[n])*(1 - np.cos(phi_angle[n])) for n in range(self.Nfil)])
+			ort_vec_unit	= np.array([ort_vec_rotated[n]/np.linalg.norm(ort_vec_rotated[n]) for n in range(self.Nfil)])
 			# alpha angle
 			angles[:,1]		= np.arccos(ort_vec_unit[:,2])
 			# beta angle

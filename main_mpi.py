@@ -14,7 +14,7 @@ nside			= int(sys.argv[2])
 Npix_box		= 256
 
 try:
-	theta_LH_RMS	= float(sys.argv[3]) # in degrees, if -1 all filaments point up
+	theta_LH_RMS	= float(sys.argv[3]) # in degrees, if -1 the filaments are perpendicular to the LOS
 except ValueError:
 	theta_LH_RMS	= None
 
@@ -64,7 +64,7 @@ if rank==0:
 	# Create the magnetic field object
 	magfield		= MagField(size_box,Npix_box,12345)
 	# Create the filament population object
-	population		= FilPop(Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,1234,fixed_distance=False)
+	population		= FilPop(Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,1234,fixed_distance=True)
 else:
 	magfield       = None
 	population     = None

@@ -89,7 +89,7 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 				}
 			}
 			double* rDistances 		= FilamentPaint_CalculateDistances(xyz_normal_to_faces,xyz_faces,xyz_edges,xyz_edges_unit,rUnitVector_ipix);
-			double* integ			= FilamentPaint_Integrator(rDistances[0],rDistances[1],inv_rot_matrix,rUnitVector_ipix,LocalTriad_ipix,centers_arr,sizes_arr,Bcube_obj,Size,Npix_cube) ;
+			double* integ= FilamentPaint_Integrator(rDistances[0],rDistances[1],inv_rot_matrix,rUnitVector_ipix,LocalTriad_ipix,centers_arr,sizes_arr,Bcube_obj,Size,Npix_cube);
 
 			for (j=0;j<3;j++){
 				TQUmap[j*npix + index_pix]	= integ[j] ;
