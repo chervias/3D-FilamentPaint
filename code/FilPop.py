@@ -3,6 +3,7 @@ import numpy as np
 class FilPop:
 	def __init__(self,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,seed,fixed_distance=False):
 		self.Nfil			= Nfil
+		self.realNfil    = Nfil
 		self.magfield		= magfield
 		self.fixed_distance	= fixed_distance
 		self.max_length		= 1.0
@@ -31,7 +32,7 @@ class FilPop:
 			centers[:,1]	= radii_random*np.sin(theta_random)*np.sin(phi_random)
 			centers[:,2]	= radii_random*np.cos(theta_random)
 		else:
-			l_rand	 = np.random.uniform(0.0,1.0,self.Nfil)
+			l_rand	 = np.random.uniform(0.2,1.0,self.Nfil)
 			u_rand   = np.random.uniform(-1.0,1.0,self.Nfil)
 			phi_rand = np.random.uniform(0.0,2.*np.pi,self.Nfil)
 			centers[:,0] = (0.5*self.magfield.size)*l_rand**(1.0/3.0)*np.sqrt(1. - u_rand**2)*np.cos(phi_rand)
@@ -91,10 +92,14 @@ class FilPop:
 		# The sizes will be the ellipsoid semi axes a,b,c with a=b<c
 		sizes			= np.zeros((self.Nfil,3))
 		c_semiaxis		= self.size_scale*(1.0+np.random.pareto(self.slope-1,size=self.Nfil))
+		#a_semiaxis		= self.size_scale*(1.0+np.random.pareto(self.slope-1,size=self.Nfil))
 		#sizes[:,2]		= np.clip(c_semiaxis,0,self.max_length)
 		sizes[:,2]		= c_semiaxis
 		sizes[:,0]		= self.size_ratio*sizes[:,2]
 		sizes[:,1]		= self.size_ratio*sizes[:,2]
+		#sizes[:,0] = a_semiaxis
+		#sizes[:,1] = a_semiaxis
+		#sizes[:,2] = (1./self.size_ratio)*sizes[:,0]
 		return sizes
 
 #---------------------------------------------------------------------

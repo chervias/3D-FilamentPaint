@@ -7,15 +7,16 @@ import matplotlib.pyplot as pl
 
 from Sky import *
 from MagField import MagField
-from FilPop import FilPop
+from FilPopCopy import FilPop
 
 output_tqumap	= 'test.fits'
-nside			= 2048
+dust_template = '/home/chervias/CMB-work/Filaments/COM_CompMap_IQU-thermaldust-gnilc-unires_2048_R3.00.fits'
+nside			= 512
 Npix_box		= 256
-theta_LH_RMS	= -1 # in degrees
-size_scale		= 0.1
+theta_LH_RMS	= 55 # in degrees
+size_scale		= 0.05
 size_ratio		= 0.25
-Nfil			= 100
+Nfil			= 2
 size_box		= 400.0 # physical size box
 slope			= 2.4
 
@@ -25,10 +26,10 @@ local_triad     = get_local_triad(nside,r_unit_vectors)
 # Create the magnetic field object
 magfield		= MagField(size_box,Npix_box,12345)
 # Create the filament population object
-population		= FilPop(Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,1234,fixed_distance=True)
+population		= FilPop(nside,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,1234,dust_template,fixed_distance=False)
 
 TQUmap_total = np.zeros((3,12*nside**2))
-for n in range(Nfil):
+for n in range(population.realNfil):
 	TQUmap			= FilamentPaint.Paint_Filament(n,nside,local_triad,population,magfield)
 	for i in range(3):
 		TQUmap_total[i,:] 	+= TQUmap[i,:]

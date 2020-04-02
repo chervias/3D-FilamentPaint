@@ -267,6 +267,7 @@ double* FilamentPaint_CalculateDistances(double xyz_normal_to_faces[6][3], doubl
 
 double FilamentPaint_Density(double r, double rot_matrix[3][3], double rUnitVector_ipix[3], double centers_arr[3], double sizes_arr[3]){
 	// This function defines the density profile within the cuboid in the XYZ coordinates
+	// rot_matrix must be the inverse rotation matrix
 	int i,j;
 	static double XYZ_coord[3];
 	double radius, profile;
@@ -333,6 +334,14 @@ double* FilamentPaint_TrilinearInterpolation(PyObject* Bcube_obj, double size_bo
 	}
 	return c;
 }
+double* FilamentPaint_Blocal(PyObject* Bcube_obj,double size_box, int nbox,double center_arr[3]){
+	double* localB	= FilamentPaint_TrilinearInterpolation(Bcube_obj,size_box,nbox,center_arr);
+	static double result[3];
+	result[0] = localB[0];
+	result[1] = localB[1];
+	result[2] = localB[2];
+	return result;
+}
 
 double* FilamentPaint_Bxyz(double r, PyObject* Bcube_obj,double size_box, int nbox,double rUnitVector_ipix[3],double local_triad[3][3]){
 	// Get the local magnetic field in r*hat(r)
@@ -343,23 +352,18 @@ double* FilamentPaint_Bxyz(double r, PyObject* Bcube_obj,double size_box, int nb
 	double* localB	= FilamentPaint_TrilinearInterpolation(Bcube_obj,size_box,nbox,vec);
 	// The result is a 1D array with size 4: Bx, By, Bz, norm2
 	static double result[4];
-	double dotX=0.0,dotY=0.0,dotZ=0.0;
+	double Bx=0.0,By=0.0,Bz=0.0;
 	for (i=0;i<3;i++){
-		dotX	= dotX + localB[i]*local_triad[0][i] ;
-		dotY	= dotY + localB[i]*local_triad[1][i] ;
-		dotZ	= dotZ + localB[i]*local_triad[2][i] ;
+		Bx	= Bx + localB[i]*local_triad[0][i] ;
+		By	= By + localB[i]*local_triad[1][i] ;
+		Bz	= Bz + localB[i]*local_triad[2][i] ;
 	}
-	result[0]	= dotX;
-	result[1]	= dotY; 
-	result[2]	= dotZ;
-	result[3]	= 0.0 ;
-	for (i=0;i<3;i++){
-		result[3] = result[3] + result[i]*result[i] ;
-	}
-	//printf("%E %E %E %E \n",result[0],result[1],result[2],result[3]);
+	result[0]	= Bx;
+	result[1]	= By; 
+	result[2]	= Bz;
+	result[3]	= Bx*Bx + By*By + Bz*Bz;
 	return result;
 }
-
 double* FilamentPaint_Integrator(double r1, double r2, double rot_matrix[3][3], double rUnitVector_ipix[3],double local_triad[3][3], double centers_arr[3], double sizes_arr[3], PyObject* Bcube_obj,double size_box, int nbox){
 	// Integrator
 	static double integ[3] ;
@@ -380,7 +384,7 @@ double* FilamentPaint_Integrator(double r1, double r2, double rot_matrix[3][3], 
 		double* result	= FilamentPaint_Bxyz(y,Bcube_obj,size_box,nbox,rUnitVector_ipix,local_triad) ;
 		sumT 			= sumT + w[i]*density_0*density ;
 		sumQ			= sumQ + w[i]*density_0*density*(pow(result[1],2) - pow(result[0],2))/result[3] ;
-		sumU			= sumU + w[i]*density_0*density*(-2.0)*result[1]*result[0]/result[3] ;
+		sumU			= sumU + w[i]*density_0*density*(-2.0)*result[1]*result[0]/result[3];
 	}
 	integ[0] 		= (b-a)/2.0*sumT ;
 	integ[1]		= (b-a)/2.0*sumQ ;

@@ -27,9 +27,9 @@ class MagField:
 		kx,ky,kz 				= Bpowspec.kvecs(N,Deltak)
 		Bharmx,Bharmy,Bharmz 	= Bpowspec.Pk2harm(k,Pk,N,kmax,Deltak,self.seed)
 		Bcube					= np.zeros((self.pixels,self.pixels,self.pixels,3))
-		Bcube[:,:,:,0] 			= Bpowspec.harm2map(Bharmx,Delta).transpose()
-		Bcube[:,:,:,1] 			= Bpowspec.harm2map(Bharmy,Delta).transpose()
-		Bcube[:,:,:,2] 			= Bpowspec.harm2map(Bharmz,Delta).transpose()
+		Bcube[:,:,:,0] 			= np.transpose(Bpowspec.harm2map(Bharmx,Delta),axes=(2,1,0))
+		Bcube[:,:,:,1] 			= np.transpose(Bpowspec.harm2map(Bharmy,Delta),axes=(2,1,0))
+		Bcube[:,:,:,2] 			= np.transpose(Bpowspec.harm2map(Bharmz,Delta),axes=(2,1,0))
 		return Bcube
 	
 	def get_interpolator(self):
