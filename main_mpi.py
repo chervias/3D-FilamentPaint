@@ -5,8 +5,8 @@ from mpi4py import MPI
 import sys
 sys.path.insert(0,'code')
 from Sky import *
-from MagFieldCopy import MagField
-#from MagField import MagField
+#from MagFieldCopy import MagField
+from MagField import MagField
 #from FilPopCopy import FilPop
 from FilPop import FilPop
 
@@ -35,7 +35,7 @@ size_pool = shared_comm.Get_size()
 rank = shared_comm.Get_rank()
 
 if rank==0:
-	output_tqumap	= 'test_ns2048/tqumap_ns%s_%s_maa%s_sr%s_sl%s_minsize%s_wLarson_modifiedBcube.fits'%(str(nside),str(Nfil),str(theta_LH_RMS).replace('.','p'),str(size_ratio).replace('.','p'),str(slope).replace('.','p'),str(size_scale).replace('.','p'))
+	output_tqumap	= 'test_ns2048/tqumap_ns%s_%s_maa%s_sr%s_sl%s_minsize%s_%s.fits'%(str(nside),str(Nfil),str(theta_LH_RMS).replace('.','p'),str(size_ratio).replace('.','p'),str(slope).replace('.','p'),str(size_scale).replace('.','p'),suffix)
 	#print(output_tqumap)
 
 double_size = MPI.DOUBLE.Get_size()

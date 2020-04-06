@@ -52,8 +52,9 @@ static PyObject *Paint_Filament(PyObject *self, PyObject *args){
 	// This is for testing if the cuboid is outside the box
 	//printf("is inside before = %i\n",isInside);	
 	/* Calculate the rot matrix */
-	double** rot_matrix 			= FilamentPaint_RotationMatrix(angles_arr);	
+	double** rot_matrix 			= FilamentPaint_RotationMatrix(angles_arr);
 	double** inv_rot_matrix			= FilamentPaint_InvertRotMat(rot_matrix);
+	//double** identity = FilamentPaint_MatMul(rot_matrix,inv_rot_matrix);
 	/* Calculate the 8 vertices in the xyz coordinates */
 	double** xyz_vertices			= FilamentPaint_xyzVertices(rot_matrix,sizes_arr,centers_arr,Size,&isInside);
 	//printf("is inside after = %i\n",isInside);

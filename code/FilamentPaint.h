@@ -1,4 +1,5 @@
 double** FilamentPaint_RotationMatrix(double angles_arr[2]);
+double** FilamentPaint_MatMul(double matrix_a[3][3],double matrix_b[3][3]);
 double** FilamentPaint_InvertRotMat(double rot_matrix[3][3]);
 double** FilamentPaint_xyzVertices(double rot_matrix[3][3], double sizes_arr[3], double centers_arr[3], double Size, int* isInside);
 double** FilamentPaint_xyzNormalToFaces(double rot_matrix[3][3]);

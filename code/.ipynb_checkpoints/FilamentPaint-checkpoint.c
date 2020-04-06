@@ -38,6 +38,22 @@ double** FilamentPaint_InvertRotMat(double rot_matrix[3][3]){
 	return inv_rot_matrix;
 }
 
+double** FilamentPaint_MatMul(double matrix_a[3][3],double matrix_b[3][3]){
+	static double mat[3][3];
+	int i,j,k;
+	for (i=0;i<3;i++){
+		for (j=0;j<3;j++){
+			double sum = 0.0 ;
+			for (k=0;k<3;k++){
+				sum = sum + matrix_a[i][k]*matrix_b[k][j];
+			}
+			printf("%d \n",sum) ;
+			mat[i][j] = sum ;
+		}
+	}
+	return mat ;
+}
+
 double** FilamentPaint_xyzVertices(double rot_matrix[3][3], double sizes_arr[3], double centers_arr[3], double Size, int* isInside){
 	/* This calculates the vertices of the cuboid in the xyz fixed coord */
 	static double xyz_vertices[8][3],XYZ_vertices[8][3];
@@ -278,7 +294,7 @@ double FilamentPaint_Density(double r, double rot_matrix[3][3], double rUnitVect
 		}
 		XYZ_coord[i] = sum ;
 	}
-	radius		= sqrt(pow(XYZ_coord[0]/sizes_arr[0],2)+pow(XYZ_coord[1]/sizes_arr[1],2)+pow(XYZ_coord[2]/sizes_arr[2],2)) ;
+	radius		= pow(XYZ_coord[0]/sizes_arr[0],2)+pow(XYZ_coord[1]/sizes_arr[1],2)+pow(XYZ_coord[2]/sizes_arr[2],2);
 	profile 	= exp(-radius) ;
 	return profile;
 }
@@ -297,9 +313,9 @@ double* FilamentPaint_TrilinearInterpolation(PyObject* Bcube_obj, double size_bo
 	int idx_z0 	= floor(vector[2]*(nbox-1)/size_box + 0.5*(nbox-1.0));
 
 	// map the indices to real coordinates
-	double x0		= size_box*idx_x0/(nbox-1.0) - 0.5*size_box ;
-	double x1		= size_box*idx_x1/(nbox-1.0) - 0.5*size_box ;
-	double y0		= size_box*idx_y0/(nbox-1.0) - 0.5*size_box ;
+	double x0		= size_box*idx_x0/(nbox-1.) - 0.5*size_box ;
+	double x1		= size_box*idx_x1/(nbox-1.) - 0.5*size_box ;
+	double y0		= size_box*idx_y0/(nbox-1.) - 0.5*size_box ;
 	double y1		= size_box*idx_y1/(nbox-1.0) - 0.5*size_box ;	
 	double z0		= size_box*idx_z0/(nbox-1.0) - 0.5*size_box ;
 	double z1		= size_box*idx_z1/(nbox-1.0) - 0.5*size_box ;
@@ -371,7 +387,7 @@ double* FilamentPaint_Integrator(double r1, double r2, double rot_matrix[3][3], 
 	int i;
 	if (r1 > r2){a=r2;b=r1;}
 	else{a=r1;b=r2;}
-	// This is an implementation of fixed_quad
+	// This is an implementation of python's fixed_quad
 	// For n=5
 	double x[5]		= {-9.061798459386639637003213465505E-01,-5.384693101056831077144693153969E-01,0.0E+00,5.384693101056831077144693153969E-01,9.061798459386639637003213465505E-01} ;
 	double w[5]		= {2.369268850561889738770560143166E-01,4.786286704993665264140645376756E-01,5.688888888888891104400613585312E-01,4.786286704993665264140645376756E-01,2.369268850561889738770560143166E-01};
