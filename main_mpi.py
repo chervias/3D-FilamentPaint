@@ -5,9 +5,7 @@ from mpi4py import MPI
 import sys
 sys.path.insert(0,'code')
 from Sky import *
-#from MagFieldCopy import MagField
 from MagField import MagField
-#from FilPopCopy import FilPop
 from FilPop import FilPop
 
 # usage: python main_mpi.py Nfils nside theta_LH size_ratio slope size_box size_scale suffix
@@ -68,7 +66,7 @@ if rank==0:
 	# Create the magnetic field object
 	magfield		= MagField(size_box,Npix_box,23456)
 	# Create the filament population object
-	population		= FilPop(Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,2345,fixed_distance=False)
+	population		= FilPop(Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,2345,fixed_distance=True)
 	#population		= FilPop(nside,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,1234,dust_template,fixed_distance=False)
 else:
 	magfield       = None
@@ -94,7 +92,7 @@ split_size = shared_comm.bcast(split_size, root = 0)
 split_disp = shared_comm.bcast(split_disp, root = 0)
 test_local = np.zeros(split_size[rank],dtype='int32')
 shared_comm.Scatterv([test, split_size, split_disp, MPI.INT], test_local, root=0)
-print('rank ', rank, ': ', test_local)
+#print('rank ', rank, ': ', test_local)
 
 #output_chunk = np.zeros(np.shape(split[rank])) #Create array to receive subset of data on each core, where rank specifies the core
 #shared_comm.Scatterv([test,split_sizes_input, displacements_input,MPI.INT],output_chunk,root=0)

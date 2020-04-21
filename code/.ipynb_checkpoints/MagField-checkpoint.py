@@ -23,7 +23,8 @@ class MagField:
 		Deltak 					= Bpowspec.Delta2k(Delta,N)
 		kmax 					= np.amax(N*Deltak)
 		k 						= np.linspace(0,kmax, 500);
-		Pk 						= np.exp(-k**2/2/(kmax/40)**2)
+		#Pk 						= np.exp(-k**2/2/(kmax/40)**2)
+		Pk 						= np.exp(-k**2/2/(kmax/100)**2)
 		kx,ky,kz 				= Bpowspec.kvecs(N,Deltak)
 		Bharmx,Bharmy,Bharmz 	= Bpowspec.Pk2harm(k,Pk,N,kmax,Deltak,self.seed)
 		Bcube					= np.zeros((self.pixels,self.pixels,self.pixels,3))

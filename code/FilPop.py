@@ -50,6 +50,10 @@ class FilPop:
 			angles[:,1]		= np.arccos(hatZ[:,2])
 			# beta angle
 			angles[:,0]		= np.arctan2(hatZ[:,1],hatZ[:,0])
+			rhat = np.array([self.centers[n]/np.linalg.norm(self.centers[n]) for n in range(self.Nfil)])
+			local_B_proj = np.array([local_magfield[n] - np.dot(local_magfield[n],rhat[n])*rhat[n] for n in range(self.Nfil)])
+			filament_vec_proj = np.array([hatZ[n] - np.dot(hatZ[n],rhat[n])*rhat[n] for n in range(self.Nfil)])
+			self.psi_LH = np.array([np.arccos(np.dot(filament_vec_proj[n],local_B_proj[n])/(np.linalg.norm(local_B_proj[n])*np.linalg.norm(filament_vec_proj[n]))) for n in range(self.Nfil)])
 			return angles,hatZ
 		elif self.theta_LH_RMS == -1:
 			# we want a unit vector that is ort to center vector
@@ -68,12 +72,15 @@ class FilPop:
 		else:
 			# unit vector along the local mag field
 			hatZ			= np.array([local_magfield[n,:]/np.linalg.norm(local_magfield[n,:]) for n in range(self.Nfil)])
+			rhat = np.array([self.centers[n]/np.linalg.norm(self.centers[n]) for n in range(self.Nfil)])
+			local_B_proj = np.array([local_magfield[n] - np.dot(local_magfield[n],rhat[n])*rhat[n] for n in range(self.Nfil)])
 			# we need a second unit vector hatY perpendicular to hatZ
 			random_vectors  = np.random.uniform(0.0,1.0,size=(self.Nfil,3))
 			vecY			= np.cross(hatZ,random_vectors)
 			hatY			= np.array([vecY[n,:]/np.linalg.norm(vecY[n,:]) for n in range(self.Nfil)])
 			# This is in radians
-			theta_LH		= np.fabs(np.random.normal(0,self.theta_LH_RMS,self.Nfil))
+			theta_LH		= np.fabs(np.random.normal(loc=0,scale=self.theta_LH_RMS,size=self.Nfil))
+			self.theta_LH = theta_LH
 			#theta_LH = np.zeros(self.Nfil)
 			phi				= np.random.uniform(0,2*np.pi,self.Nfil)
 			#phi = np.zeros(self.Nfil)
@@ -81,6 +88,8 @@ class FilPop:
 			hatZprime		= np.array([hatZ[n,:]*np.cos(theta_LH[n]) + np.cross(hatY[n,:],hatZ[n,:])*np.sin(theta_LH[n]) + hatY[n,:]*np.dot(hatY[n,:],hatZ[n,:])*(1 - np.cos(theta_LH[n])) for n in range(self.Nfil)])
 			# We rotate hatZprime around hatZ by phi using Rodrigues formula
 			hatZprime2		= np.array([hatZprime[n,:]*np.cos(phi[n]) + np.cross(hatZ[n,:],hatZprime[n,:])*np.sin(phi[n]) + hatZ[n,:]*np.dot(hatZ[n,:],hatZprime[n,:])*(1 - np.cos(phi[n])) for n in range(self.Nfil)])
+			filament_vec_proj = np.array([hatZprime2[n] - np.dot(hatZprime2[n],rhat[n])*rhat[n] for n in range(self.Nfil)])
+			self.psi_LH = np.array([np.arccos(np.dot(filament_vec_proj[n],local_B_proj[n])/(np.linalg.norm(local_B_proj[n])*np.linalg.norm(filament_vec_proj[n]))) for n in range(self.Nfil)])
 			# Now hatZprime2 is the direction of the long axis of the filament
 			norm_hatZprime2	= np.linalg.norm(hatZprime2,axis=1)
 			# beta angle
@@ -92,6 +101,7 @@ class FilPop:
 		# The sizes will be the ellipsoid semi axes a,b,c with a=b<c
 		sizes			= np.zeros((self.Nfil,3))
 		c_semiaxis		= self.size_scale*(1.0+np.random.pareto(self.slope-1,size=self.Nfil))
+		#c_semiaxis = self.size_scale*np.ones(self.Nfil)
 		#a_semiaxis		= self.size_scale*(1.0+np.random.pareto(self.slope-1,size=self.Nfil))
 		#sizes[:,2]		= np.clip(c_semiaxis,0,self.max_length)
 		sizes[:,2]		= c_semiaxis

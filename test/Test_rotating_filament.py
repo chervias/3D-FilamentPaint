@@ -20,7 +20,7 @@ slope			= 2.4
 Nfil			= 1
 size_box		= 400.0
 
-Nangles = 25
+Nangles = 50
 
 class FilPopEmpty:
 	def __init__(self,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,magfield,seed,fixed_distance=False):
@@ -48,13 +48,13 @@ local_triad     = get_local_triad(nside,r_unit_vectors)
 # Modify the magfield
 angle_arr = np.linspace(0,2*np.pi,Nangles)
 
-center = np.array([75,75,0])
+center = np.array([75,0,0])
 pix_id = hp.vec2pix(nside,center[0],center[1],center[2],nest=False)
 XYZ = local_triad[pix_id]
 magfield		= MagField(400.0,256,23456)
 
 pop_arr = []
-khat = np.array([0.435,-0.235,1.224])/np.linalg.norm(np.array([0.435,-0.235,1.224]))
+khat = np.array([1,1,1])/np.linalg.norm(np.array([1,1,1]))
 ort_vec = np.cross(khat,np.array([1,2,2]))
 
 # modify the pop object
@@ -81,10 +81,10 @@ for n in range(Nangles):
 	#almT,almE,almB = hp.map2alm(tqu_map,pol=True)
 	#E_map = hp.alm2map(almE,nside)
 	#B_map = hp.alm2map(almB,nside)
-	T = hp.gnomview(tqu_map[0],rot=(45,0),reso=10.0,nest=False,notext=True,title='',cbar=False,return_projected_map=True,no_plot=True,min=-1,max=1)
+	T = hp.gnomview(tqu_map[0],rot=(0,0),reso=10.0,nest=False,notext=True,title='',cbar=False,return_projected_map=True,no_plot=True,min=-1,max=1)
 	ax_T = pl.gca() ; ax_T.set_aspect('equal');ax_T.set_xticklabels([]);ax_T.set_yticklabels([])
 	im = pl.imshow(T,vmin=-1,vmax=1,animated=True)
 	ims.append([im])
 
-ani = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=1000)
+ani = animation.ArtistAnimation(fig, ims, interval=200, blit=True, repeat_delay=1000)
 ani.save('dynamic_images.mp4')

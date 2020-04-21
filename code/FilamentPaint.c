@@ -295,7 +295,7 @@ double FilamentPaint_Density(double r, double rot_matrix[3][3], double rUnitVect
 		XYZ_coord[i] = sum ;
 	}
 	radius		= pow(XYZ_coord[0]/sizes_arr[0],2)+pow(XYZ_coord[1]/sizes_arr[1],2)+pow(XYZ_coord[2]/sizes_arr[2],2);
-	profile 	= exp(-radius) ;
+	profile 	= exp(-sqrt(radius)) ;
 	return profile;
 }
 
