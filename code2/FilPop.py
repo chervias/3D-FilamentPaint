@@ -2,7 +2,7 @@ import numpy as np
 import healpy as hp
 
 class FilPop:
-	def __init__(self,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,Bcube,interpolator,size,seed,alpha,beta,nside,dust_template,beta_template,T_template,ell_limit,fixed_distance=False,fixed_size=False,galactic_plane=False):
+	def __init__(self,Nfil,theta_LH_RMS,size_ratio,size_scale,slope,Bcube,interpolator,size,seed,alpha,beta,nside,dust_template,beta_template,T_template,ell_limit,path_correlation,fixed_distance=False,fixed_size=False,galactic_plane=False):
 		self.Nfil			= Nfil
 		#self.realNfil    = Nfil
 		self.Bcube		= Bcube
@@ -34,7 +34,7 @@ class FilPop:
 		self.sizes					= self.get_sizes()
 		self.reject_big_filaments()
 		self.fpol0 = self.get_fpol()
-		self.beta_array, self.T_array = self.get_beta_T()
+		self.beta_array, self.T_array = self.get_beta_T(path_correlation)
 		# now delete the objectes according to mask
 		self.centers = self.centers[np.logical_not(self.mask),...]
 		self.angles = self.angles[np.logical_not(self.mask),...]
@@ -173,11 +173,11 @@ class FilPop:
 		# create a beta distribution for fpol0 
 		fpol0 = np.random.beta(self.alpha,self.beta,size=self.Nfil)
 		return fpol0
-	def get_beta_T(self):
+	def get_beta_T(self,path_correlation):
 		beta_map_original = hp.read_map(self.beta_template,field=(0,1))
 		beta_map_nside = hp.ud_grade(beta_map_original,self.nside)
 		# load correlation
-		correlation = np.load('/home/chervias/CMB-work/Filaments/3dfilament-project-healpix/output/ThermalDustCorrelation.npz')
+		correlation = np.load(path_correlation)
 		beta_array = np.zeros((self.realNfil))
 		#T_array = np.zeros((self.realNfil))
 		for n in range(self.realNfil):
