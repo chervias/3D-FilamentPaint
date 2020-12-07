@@ -1,0 +1,14 @@
+void FilamentPaint_RotationMatrix(double* angles_arr, double* rot_matrix);
+void FilamentPaint_InvertRotMat(double* rot_matrix, double* inv_rot_matrix);
+void FilamentPaint_xyzVertices(double* rot_matrix, double* sizes_arr, double* centers_arr, double Size, unsigned int* isInside,double* xyz_vertices);
+void FilamentPaint_xyzNormalToFaces(double* rot_matrix, double* xyz_normal_to_faces);
+void FilamentPaint_xyzFaces(double* xyz_vertices, double* xyz_faces);
+void FilamentPaint_xyzEdgeVectors(double* xyz_faces, double* xyz_edges);
+void FilamentPaint_xyzEdgeVectorsUnit(double* xyz_edges, double* xyz_edges_unit);
+void FilamentPaint_DoQueryPolygon(unsigned int nside, double* xyz_faces, unsigned long* ipix, unsigned long* nipix);
+void FilamentPaint_DoLocalTriad(unsigned long* ipix, unsigned long nipix, unsigned int nside, double* localtriad);
+void FilamentPaint_CalculateDistances(double* xyz_normal_to_faces, double* xyz_faces, double* xyz_edges, double* xyz_edges_unit, unsigned long idx_pix, double* local_triad, double* distances);
+double FilamentPaint_Density(double r, double* rot_matrix, unsigned long idx_pix, double* local_triad, double* centers_arr, double* sizes_arr);
+void FilamentPaint_TrilinearInterpolation(PyObject* Bcube_obj, double size_box, unsigned int nbox, double* vector, double* c);
+void FilamentPaint_Bxyz(double r, PyObject* Bcube_obj, double size_box, unsigned int nbox, unsigned long idx_pix, double* local_triad, double* result) ;
+void FilamentPaint_RiemannIntegrator(double r1, double r2, double* rot_matrix, unsigned long idx_pix, double* local_triad, double* centers_arr, double* sizes_arr, PyObject* Bcube_obj, double size_box, unsigned int nbox, double* integ, PyObject* fpol0, PyObject* thetaH);
