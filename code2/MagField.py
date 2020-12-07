@@ -2,7 +2,7 @@ import Bpowspec
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
-def get_MagField(size,pixels,seed,method):
+def get_MagField(size,pixels,seed,method,path):
 	# WARNING !!!!!!!
 	# Kevin's code will output a B cube with indices Bcube[iz,iy,ix], so we have to transpose to put it in the format
 	# [ix,iy,iz]
@@ -10,7 +10,7 @@ def get_MagField(size,pixels,seed,method):
 	# Load the large scale Bcube
 	
 	if method==1:
-		Bcube_ls = np.load('/home/chervias/CMB-work/Filaments/3dfilament-project-healpix/data/Bcube_Galactic_large-scale-20kpc.npz')['Bcube'] # this is in [iz,iy,ix] order
+		Bcube_ls = np.load(path)['Bcube'] # this is in [iz,iy,ix] order
 		size3d 					= np.array([size,size,size])
 		N 						= np.array([pixels,pixels,pixels],dtype=np.int32)
 		Delta 					= size3d/N
